@@ -307,10 +307,10 @@ Mỗi con số kèm một câu lý do, lấy từ `data/world.json` → `ops_lim
 
 | Khoá | Giá trị bàn đặt | Lý do (một câu, có số) |
 |---|---|---|
-| `business.daily_refund_cap_vnd` | | |
-| `business.cost_budget_per_ticket_vnd` | | |
-| `business.pilot_scope` (all / warehouse / percent) | | |
-| `business.roi_min` | | |
+| `business.daily_refund_cap_vnd` | 2.000.000đ | Đúng ngân sách hoàn tự động Finance đã thống nhất (`ops_limits.daily_auto_refund_budget_vnd` = 2.000.000đ); mốc base mới dùng 155.000đ/ngày nên kể cả lượng việc tăng gấp ba vẫn dư, khoản nào làm vượt trần thì chuyển chị Hạnh duyệt. |
+| `business.cost_budget_per_ticket_vnd` | 1.500đ | Đúng trần tiền LLM mỗi ticket (`ops_limits.max_llm_cost_per_ticket_vnd` = 1.500đ); ticket tốn nhiều nhất ở mốc base là 670đ nên trần này không chặn ca bình thường, chỉ chặn ticket dài bất thường. |
+| `business.pilot_scope` (all / warehouse / percent) | warehouse: HN, HCM, DN, CT | Cắt kho sỉ HCM-B2B (mỗi đơn từ 2 triệu): bộ nền không có ticket nào của kho này nên chưa có bằng chứng trợ lý làm đúng, mà một lần hoàn sai ở đây lớn gấp nhiều lần đơn lẻ; ticket HCM-B2B vẫn làm tay. Giữ HCM dù có 1 lần hỏng (T-002@55) vì đó là lỗi kỹ thuật đã có cổng xử lý, còn 4 kho bán lẻ có chi phí 590–4.586đ/ticket, đều rẻ hơn làm tay 10.000đ; độ phủ trên bộ nền vẫn 100%. |
+| `business.roi_min` | 0,2 | Khớp ngưỡng `roi_min` đã ký trong tiêu chí; tiết kiệm ròng phải ít nhất bằng 20% chi phí bỏ ra (mốc base đạt 1,34). |
 
 ### B7.5 · Câu 2.10 · Cổng con người, vận hành, pháp lý + Runbook phần 1–3
 
