@@ -29,7 +29,7 @@ Mỗi thành viên tự viết một mục bên dưới (chép mẫu, đổi ti�
 
 ### Phần việc phụ trách
 
-Vai trong bàn; câu nào của đề, mục nào của phiếu A/B/C, file nào (`lab10/guards.py`, `config/operating_gates.json`, …).
+Vai trong bàn: Vận hành và pháp lý ; Form a: 1.2, 1.3,... 
 
 ### Đóng góp cụ thể
 
@@ -37,7 +37,7 @@ Vai trong bàn; câu nào của đề, mục nào của phiếu A/B/C, file nào
 
 ### Bằng chứng
 
-Mã commit, mã lần chạy (`runs/<mã>`), dòng trong phiếu.
+
 
 ### Exit ticket
 
