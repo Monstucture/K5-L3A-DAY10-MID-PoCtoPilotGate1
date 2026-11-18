@@ -30,10 +30,10 @@ Mỗi lệnh `lab10.eval` và `lab10.grade` tự ghi một dòng vào `runs/jour
 
 | # | Mã lần chạy | Bộ ticket · mốc | Đổi MỘT thứ gì so với lần trước | pass_rate (khoảng tin cậy 95%) | pass_k | Hoàn sai (đ) · lỗi hãng oan · lộ dữ liệu | Tỉ lệ chuyển người | Kết luận (một câu) |
 |---|---|---|---|---|---|---|---|---|
-| 1 | | Sx · prepared | nhận thẻ đã bốc, chưa sửa thêm (đúng cổng vòng 1 đã chốt) | | | | | |
-| 2 | | Sx · after | | | | | | |
+| 1 | `R-S4-prepared-20261118-212702-35ac51` | Sx · prepared | nhận thẻ đã bốc, chưa sửa thêm (đúng cổng vòng 1 đã chốt) | 1,0 | 1,0 | 0 · 0 · 0 | 0,3659 | Cổng vòng 1 đỡ được hoàn sai và lỗi hãng oan; không đỡ được hàng chờ (4 ca ùn, tổng hoàn 422.000đ > 300.000đ) |
+| 2 | `R-S4-after-20261118-212702-35ac51` | Sx · after | Cổng 1d đã có trong `guards.py` (`basis == "fail_open"` thì chuyển người) và config 2 người trực, 12 ca/giờ | 1,0 [1,0; 1,0] | 1,0 | 0 · 0 · 0 | 0,5756 | Mọi chỉ số bắt buộc đạt, 0 ca ùn, tổng hoàn 294.000đ ≤ 300.000đ; chưa đạt nice-to-have (chuyển người 0,5756 > 0,3), ROI 0,28 và chi phí 7.795đ sát ngưỡng đã ký |
 | 3 | | Sx · after | | | | | | |
-| 4 | | base · after | (kiểm không regression) | | | | | |
+| 4 | `R-base-after-20261118-212741-35ac51` | base · after | (kiểm không regression, grade integrity ✅) | 1,0 [1,0; 1,0] | 1,0 | 0 · 0 · 0 | 0,2727 | 110/110 đạt, không ca nào đang đúng bị hỏng; chuyển người 0,2727 (gồm kiểm lại 10%), ROI 0,72 |
 
 ---
 
@@ -47,14 +47,14 @@ Chạy **trước khi sửa bất cứ thứ gì**:
 python3 -m lab10.grade --incident Sx
 ```
 
-- Mã lần chạy grade: `R-S4-grade-20261118-172245-8c2343` · base: `R-S4-before-20261118-172246-8c2343` · prepared: `R-S4-prepared-20261118-172246-8c2343`. **Mốc prepared KHÔNG dùng được**: grader báo "bản chốt vòng 1 ĐÃ BỊ SỬA sau khi chốt", và kiểm 1 integrity báo nhiều file khoá bị đổi (`lab10/agent.py`, `lab10/eval.py`, `data/world.json`, `incidents/S4/…`, và các file khác). File tiêu chí cũng bị báo đã sửa sau khi ký (kiểm 2). Cần xác định ai đổi, trước khi dùng số prepared.
+- Mã lần chạy grade: `R-S4-grade-20261118-212702-35ac51` · base: `R-S4-before-20261118-212702-35ac51` · prepared: `R-S4-prepared-20261118-212702-35ac51` · after: `R-S4-after-20261118-212702-35ac51`. Mốc prepared dùng được: grader báo "đã chốt `f9436b2e`, còn nguyên", kiểm 1 integrity ✅, kiểm 2 criteria ✅ (PASS-VISIBLE). Lần grade trước (`R-S4-grade-20261118-172245-8c2343`) báo integrity ❌ vì xuống dòng CRLF trên Windows làm hash file khoá lệch, không phải do ai sửa nội dung; đã đưa 19 file khoá về LF (`core.autocrlf false`) rồi chạy lại.
 - Cổng vòng 1 đỡ được (cột visible, base → prepared): hoàn sai 160.000đ → 0; lỗi hãng oan 27 → 0; pass_rate 0,8683 → 1,0; pass_k 0,6829 → 1,0. **Không đỡ được** hàng chờ: chờ lâu nhất 78 phút và 4 ca ùn giữ nguyên.
-- Khối kinh doanh và vận hành còn dòng vượt trần: tổng hoàn tự động một ngày **422.000đ > ngân sách 300.000đ** (mốc prepared và after). Số ca ùn 4 và tỉ lệ chuyển người 0,3659 không đổi.
+- Khối kinh doanh và vận hành còn dòng vượt trần: ở mốc prepared tổng hoàn tự động một ngày **422.000đ > ngân sách 300.000đ**; số ca ùn 4 và tỉ lệ chuyển người 0,3659 giữ nguyên so với base. Ở mốc after: 294.000đ (không vượt, nhưng sát trần), 0 ca ùn, tỉ lệ chuyển người 0,5756 (vượt ngưỡng nice-to-have 0,3).
 
 **Mở lại pre-mortem (Phiếu B mục B6), viết bằng bút khác màu.** Với thẻ S1, S3, S4, S5 đây là một phần của phần riêng theo thẻ.
 
-- Sự cố trên thẻ thuộc lăng kính nào (kỹ thuật, kinh doanh, con người và vận hành, pháp lý)? …
-- Có nằm trong các lý do bàn đã viết không? Nếu có: cổng vòng 1 đã đỡ được bao nhiêu (đọc cột prepared trong report)? Nếu không: vì sao cả bàn không nghĩ tới? …
+- Sự cố trên thẻ thuộc lăng kính nào (kỹ thuật, kinh doanh, con người và vận hành, pháp lý)? Chủ yếu **con người và vận hành** (một người trực, hàng chờ ngập giờ cao điểm), cộng **kinh doanh** (trần hoàn tự động ngày sale) và **kỹ thuật** (LLM 429 rồi fail-open).
+- Có nằm trong các lý do bàn đã viết không? Có một phần: B6 có dòng "Lượng ticket tăng mà vẫn chỉ 1 người duyệt (6 ca/giờ)…" (con người và vận hành), nhưng ở vòng 1 chỉ xử lý bằng config, nên cổng vòng 1 **không đỡ được** hàng chờ (prepared = base: chờ lâu nhất 78 phút, 4 ca ùn). Hai nhánh còn lại không có trong B6: LLM trả 429 làm trợ lý rơi về `fail_open` (hoàn không kiểm chính sách), và trần hoàn tự động riêng của ngày sale (300.000đ). Cổng vòng 1 vẫn đỡ được hoàn sai (160.000đ → 0) vì cổng hoàn tính lại quyền lợi từ tracking DB bất kể `basis`. Bàn không nghĩ tới vì ở vòng 1 giả định LLM luôn trả lời và trần ngày không đổi.
 - Lý do còn thiếu, thêm bây giờ:
 
 | Lý do thất bại (viết ở thì quá khứ) | Lăng kính | Kiểm được bằng gì (trace / data / config nào) |
@@ -327,9 +327,9 @@ python3 -m lab10.grade --incident Sx
 
 | Nhánh fault tree | Nguyên nhân | Chỗ sửa (hàm + nhánh trong `guards.py`, hoặc khoá trong `operating_gates.json`) | Tầng (phát hiện / chặn / giới hạn thiệt hại / vận hành) | GIẢM khả năng hay NGĂN hẳn? Vì sao | Mã lần chạy sau khi sửa |
 |---|---|---|---|---|---|
-| [1] (hoàn khi LLM 429, fail-open) | Agent gọi `issue_refund` với `basis = fail_open` khi policy_check trả 429 hai lần (`lab10/agent.py:150-154`); thẻ: "lúc LLM nghẽn trợ lý duyệt nhiều hơn" | `lab10/guards.py` · `write_gate` · `issue_refund` · cổng 1d: `basis == "fail_open"` thì `Verdict.escalate` | Chặn | NGĂN hẳn nhánh tự hoàn khi không kiểm được chính sách. Đánh đổi: mọi ca 429 chuyển người, nên tỉ lệ chuyển người tăng | `R-S4-after-20261118-200414-984599` (sau sửa; chưa chạy `grade --incident S4`) |
-| [2] (tổng hoàn tự động vượt ngân sách ngày) | Agent chỉ kiểm từng ticket, không cộng dồn trong ngày (`agent.py:171`); thẻ: tổng hoàn "vượt 300.000đ" | `lab10/guards.py` · `write_gate` · `issue_refund` · cổng 1c: cộng `auto_refund_today_vnd()`, ngân sách = min(`ops_limits.daily_auto_refund_budget_vnd`, `business.daily_refund_cap_vnd`), vượt thì `Verdict.escalate` | Giới hạn thiệt hại | NGĂN hẳn vượt trần tự động (khoản thứ vượt trần bị chuyển người). Chỉ áp cho hoàn tự động; khoản đã có phê duyệt không tính vào trần, theo thiết kế của `ops_limits` | `R-S4-after-20261118-200414-984599`: tổng 294.000đ ≤ 300.000đ, không vượt trần |
-| [3] (hàng chờ người duyệt ùn) | Một người trực, 6 ca/giờ, trong khi cao điểm ~14–20 ca/giờ; S4 before: chờ lâu nhất 78 phút, 4 ca ùn | `config/operating_gates.json` · `operations.reviewers_on_shift` = 2, `operations.review_capacity_per_hour` = 12, `operations.max_queue_wait_minutes` = 60 (đội đã đặt) | Vận hành | GIẢM khả năng ùn, không NGĂN: `peak_hour_review_load` sau sửa là 20 ca/giờ, vẫn cao hơn công suất 12; ca chờ lâu nhất 41 phút, 0 ca ùn | `R-S4-after-20261118-200414-984599` (chờ lâu nhất 41 phút, 0 ca ùn) |
+| [1] (hoàn khi LLM 429, fail-open) | Agent gọi `issue_refund` với `basis = fail_open` khi policy_check trả 429 hai lần (`lab10/agent.py:150-154`); thẻ: "lúc LLM nghẽn trợ lý duyệt nhiều hơn" | `lab10/guards.py` · `write_gate` · `issue_refund` · cổng 1d: `basis == "fail_open"` thì `Verdict.escalate` | Chặn | NGĂN hẳn nhánh tự hoàn khi không kiểm được chính sách. Đánh đổi: mọi ca 429 chuyển người, nên tỉ lệ chuyển người tăng | `R-S4-after-20261118-212702-35ac51` (sau sửa; `R-S4-grade-20261118-212702-35ac51`: PASS-VISIBLE) |
+| [2] (tổng hoàn tự động vượt ngân sách ngày) | Agent chỉ kiểm từng ticket, không cộng dồn trong ngày (`agent.py:171`); thẻ: tổng hoàn "vượt 300.000đ" | `lab10/guards.py` · `write_gate` · `issue_refund` · cổng 1c: cộng `auto_refund_today_vnd()`, ngân sách = min(`ops_limits.daily_auto_refund_budget_vnd`, `business.daily_refund_cap_vnd`), vượt thì `Verdict.escalate` | Giới hạn thiệt hại | NGĂN hẳn vượt trần tự động (khoản thứ vượt trần bị chuyển người). Chỉ áp cho hoàn tự động; khoản đã có phê duyệt không tính vào trần, theo thiết kế của `ops_limits` | `R-S4-after-20261118-212702-35ac51`: tổng 294.000đ ≤ 300.000đ, không vượt trần |
+| [3] (hàng chờ người duyệt ùn) | Một người trực, 6 ca/giờ, trong khi cao điểm ~14–20 ca/giờ; S4 before: chờ lâu nhất 78 phút, 4 ca ùn | `config/operating_gates.json` · `operations.reviewers_on_shift` = 2, `operations.review_capacity_per_hour` = 12, `operations.max_queue_wait_minutes` = 60 (đội đã đặt) | Vận hành | GIẢM khả năng ùn, không NGĂN: `peak_hour_review_load` sau sửa là 20 ca/giờ, vẫn cao hơn công suất 12; ca chờ lâu nhất 41 phút, 0 ca ùn | `R-S4-after-20261118-212702-35ac51` (chờ lâu nhất 41 phút, 0 ca ùn) |
 
 Ghi chú: C6 (fault tree trước khi sửa) còn trống, nên ba nhánh [1]–[3] lấy theo thứ tự ba dòng HAZOP ở C4.
 

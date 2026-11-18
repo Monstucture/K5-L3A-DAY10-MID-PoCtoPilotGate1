@@ -13,10 +13,10 @@ Họ tên đầy đủ và MSSV của **mọi** thành viên; thêm dòng nếu 
 
 | STT | Họ và tên | MSSV | Vai | Trưởng nhóm |
 | --: | --------- | ---- | --- | :---------: |
-|   1 | Trần Thanh Long | 2A202603674 | Vận hành và pháp lý | [x] |
-|   2 | Nguyễn Văn Vinh | 2A202603672 | Kỹ sư cổng |             |
-|   3 | Phạm Cát Tân | 2A202603678 | Sản phẩm và kinh doanh |            |
-|   4 |Bùi Anh Dũng           |2A202603687      | Kỹ sư cổng     |             |
+| 1 | Trần Thanh Long | 2A202603674 | Vận hành và pháp lý | [x] |
+| 2 | Nguyễn Văn Vinh | 2A202603672 | Kỹ sư cổng | |
+| 3 | Phạm Cát Tân | 2A202603678 | Sản phẩm và kinh doanh | |
+| 4 | Bùi Anh Dũng | 2A202603687 | Kỹ sư cổng | |
 
 Ghi `members` trong `submission/submission.json` theo dạng `"HoVaTen-MSSV"`, khớp bảng trên.
 
@@ -32,7 +32,7 @@ Vai trong bàn: **Vận hành và pháp lý** (trưởng nhóm).
 
 - Form A: 1.2, 1.3,
 - Phiếu B: mục B5 (checklist 9 nhóm việc, cột PIC); mục B7.5 (`config/operating_gates.json` mục `operations` và `legal`, runbook phần 1–3).
-- Phiếu C: mục C1 (mốc prepared, đối chiếu pre-mortem), C4 (HAZOP của thẻ S4), C5 câu 3.3 (giả định môi trường), C7 (bảng sửa), C10 (risk register). 
+- Phiếu C: mục C1 (mốc prepared, đối chiếu pre-mortem), C4 (HAZOP của thẻ S4), C5 câu 3.3 (giả định môi trường), C7 (bảng sửa), C10 (risk register).
 
 ### Đóng góp cụ thể
 
@@ -92,7 +92,6 @@ Một điều học được, một điều còn chưa chắc.
 
 ## BuiAnhDung-2A202603687
 
-
 ### Phần việc phụ trách
 
 Vai trong bàn: **Kỹ sư cổng** (người 1, cùng Nguyễn Văn Vinh).
@@ -115,7 +114,7 @@ Vai trong bàn: **Kỹ sư cổng** (người 1, cùng Nguyễn Văn Vinh).
 
 ### Dùng AI
 
-Dùng Claude (trợ lý AI trong Claude Code) để: đọc `lab10/agent.py`, `tools.py`, `helpers.py` và data để hiểu luồng hoàn tiền; viết 3 cổng trong `guards.py`; chạy `eval`, `trace` và đọc report; điền một phần phiếu B từ kết quả chạy. Việc do bạn quyết định: chọn cổng nào, ngưỡng nào đã ký, và khuyến nghị tự chặn / người duyệt / kết hợp. [Bạn đọc lại, sửa cho đúng việc đã làm.]
+Dùng Claude (trợ lý AI trong Claude Code) để: đọc `lab10/agent.py`, `tools.py`, `helpers.py` và data để hiểu luồng hoàn tiền; viết 3 cổng trong `guards.py`; chạy `eval`, `trace` và đọc report; điền một phần phiếu B từ kết quả chạy. Việc do bạn quyết định: chọn cổng nào, ngưỡng nào đã ký, và khuyến nghị tự chặn / người duyệt / kết hợp.
 
 ### Exit ticket
 
