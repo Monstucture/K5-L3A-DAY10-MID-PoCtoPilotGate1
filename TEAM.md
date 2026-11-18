@@ -13,14 +13,10 @@ Họ tên đầy đủ và MSSV của **mọi** thành viên; thêm dòng nếu 
 
 | STT | Họ và tên | MSSV | Vai | Trưởng nhóm |
 | --: | --------- | ---- | --- | :---------: |
-|   1 |           |      |     |             |
-|   2 | Bùi Anh Dũng          |2A202603687      |     |             |
-|   1 |     Trần Thanh Long      |    2A2026603674  |   Vận hành và pháp lý  |     [x]        |
-|   2 |           |      |     |             |
-|   1 | Trần Thanh Long | 2A2026603674 | Vận hành và pháp lý | [x] |
+|   1 | Trần Thanh Long | 2A202603674 | Vận hành và pháp lý | [x] |
 |   2 | Nguyễn Văn Vinh | 2A202603672 | Kỹ sư cổng |             |
-|   3 | Phạm Cát Tân | 2A202603678 | Sản phẩm và kinh doanh |             |
-|   4 |           |      |     |             |
+|   3 | Phạm Cát Tân | 2A202603678 | Sản phẩm và kinh doanh |            |
+|   4 |Bùi Anh Dũng           |2A202603687      | Kỹ sư cổng     |             |
 |   5 |           |      |     |             |
 
 Ghi `members` trong `submission/submission.json` theo dạng `"HoVaTen-MSSV"`, khớp bảng trên.
@@ -30,6 +26,24 @@ Ghi `members` trong `submission/submission.json` theo dạng `"HoVaTen-MSSV"`, k
 Mỗi thành viên tự viết một mục bên dưới (chép mẫu, đổi tiêu đề thành họ tên không dấu và MSSV, ví dụ `## NguyenVanAn-20241234`).
 
 ## TranThanhLong-2A2026603674
+
+### Phần việc phụ trách
+
+Vai trong bàn; câu nào của đề, mục nào của phiếu A/B/C, file nào (`lab10/guards.py`, `config/operating_gates.json`, …).
+
+### Đóng góp cụ thể
+
+...
+
+### Bằng chứng
+
+Mã commit, mã lần chạy (`runs/<mã>`), dòng trong phiếu.
+
+### Exit ticket
+
+Một điều học được, một điều còn chưa chắc.
+
+## Nguyễn Văn Vinh-2A202603672
 
 ### Phần việc phụ trách
 
