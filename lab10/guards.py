@@ -54,6 +54,30 @@ def _facts(ctx, order_id):
     return order, policy, worst, delay, cause
 
 
+def _approval_problem(ctx, approval_id, order, amount):
+    """Lý do mã phê duyệt KHÔNG dùng được cho khoản hoàn này (None = hợp lệ). Chỉ đọc bảng approvals và sổ cái."""
+    found = ctx.tools.lookup_approvals(approval_id=approval_id)
+    if not found:
+        return "không có trong bảng phê duyệt"
+    a = found[0]
+    if a.get("order_id") != order.get("order_id"):
+        return "phê duyệt của đơn khác"
+    if a.get("customer_id") and a["customer_id"] != order.get("customer_id"):
+        return "phê duyệt của khách khác"
+    if a.get("status") != "valid":
+        return "trạng thái " + str(a.get("status"))
+    if a.get("expires_at") and H.d(a["expires_at"]) < H.d(ctx.as_of):
+        return "đã hết hạn"
+    approver = ((ctx.gates or {}).get("operations") or {}).get("approver_id")
+    if approver and a.get("approver_id") != approver:
+        return "người duyệt không phải người đứng tên đã thống nhất"
+    if a.get("max_vnd") is not None and amount > a["max_vnd"]:
+        return "số tiền vượt mức đã duyệt"
+    if ctx.tools.ledger_rows(approval_id=approval_id):
+        return "mã đã dùng cho một khoản hoàn khác"
+    return None
+
+
 def pre_guard(ctx):
     policy = H.effective_policy(ctx.tools.lookup_policies(), ctx.as_of)
     if policy is not None:
@@ -76,7 +100,17 @@ def write_gate(ctx, action):
         if entitled <= 0:
             return Verdict.deny("theo tracking DB và chính sách hiệu lực, đơn không đủ điều kiện hoàn")
         amount = min(int(action.get("amount_vnd", 0)), entitled)
-        if amount > policy["auto_limit_vnd"] and not action.get("approval_id"):
+        approval_id = action.get("approval_id")
+        if approval_id:                                                     # cổng 1b: phê duyệt phải hợp lệ
+            problem = _approval_problem(ctx, approval_id, order, amount)
+            if problem:
+                ctx.log("approval_rejected", approval_id=approval_id, problem=problem)
+                if amount > policy["auto_limit_vnd"]:
+                    return Verdict.escalate("phê duyệt không hợp lệ (" + problem + "): chuyển người duyệt")
+                # khoản nhỏ không cần phê duyệt; bỏ mã sai để nó không lách trần hoàn tự động mỗi ngày
+                return Verdict.modify("bỏ mã phê duyệt không hợp lệ (" + problem + ")",
+                                      amount_vnd=amount, payer="LOGIX", approval_id=None)
+        if amount > policy["auto_limit_vnd"] and not approval_id:
             return Verdict.escalate("vượt hạn mức tự động và chưa có phê duyệt")
         if amount != action.get("amount_vnd") or action.get("payer", "LOGIX") != "LOGIX":
             ctx.log("refund_corrected", asked=action.get("amount_vnd"), entitled=entitled, payer=action.get("payer"))
