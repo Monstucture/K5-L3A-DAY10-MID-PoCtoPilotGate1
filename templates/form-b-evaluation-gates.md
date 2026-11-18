@@ -120,15 +120,15 @@ Gợi ý: mở `data/world.json` phần `policies`, `orders[].parcels`, `ops_lim
 
 | Mục | Điền cho trợ lý hoàn tiền |
 |---|---|
-| Người dùng | |
-| Việc người dùng cần làm xong | |
-| Đầu ra của hệ thống (kể cả các lệnh ghi) | |
-| Dữ liệu trợ lý đọc lúc chạy (bảng nào trong `data/world.json`) | |
-| Trường then chốt quyết định tiền và lỗi hãng | |
-| Với mỗi trường then chốt: **nguồn sự thật** hay **bản sao** (ai cập nhật, khi nào)? | |
-| Định dạng cần để ý (ngày, trường được phép trống, đơn nhiều kiện) | |
-| Thế giới thật làm dữ liệu lệch ở đâu (theo mùa, đổi chính sách, giờ cao điểm, người nhập tay)? | |
-| Câu người ngoài sẽ hỏi về nguồn dữ liệu ("sao hệ thống biết đơn trễ mấy ngày?") | |
+| Người dùng | Khách hàng đòi hoàn tiền vì giao trễ, và người duyệt CSKH nhận ca chuyển sang |
+| Việc người dùng cần làm xong | Nhận tiền hoàn đúng với số ngày trễ thật, hoặc hiểu vì sao không được hoàn |
+| Đầu ra của hệ thống (kể cả các lệnh ghi) | Hoàn tiền, ghi lỗi cho hãng, thông báo hãng, trả lời khách |
+| Dữ liệu trợ lý đọc lúc chạy (bảng nào trong `data/world.json`) | `orders`, `parcels`, `policies`, `ops_limits` |
+| Trường then chốt quyết định tiền và lỗi hãng | `parcels[].promised_date`, `parcels[].delivered_date`, `delay_cause` |
+| Với mỗi trường then chốt: **nguồn sự thật** hay **bản sao** (ai cập nhật, khi nào)? | `delivered_date` là bản ghi của hãng vận chuyển (nguồn sự thật); `ops_limits` là con số đã thống nhất, cập nhật bằng tay |
+| Định dạng cần để ý (ngày, trường được phép trống, đơn nhiều kiện) | Ngày dạng `YYYY-MM-DD`; delivered_date có thể null |
+| Thế giới thật làm dữ liệu lệch ở đâu (theo mùa, đổi chính sách, giờ cao điểm, người nhập tay)? | Điểm giao hàng quét thiếu rồi nhập bù tay; đổi chính sách; đổi trần hoàn |
+| Câu người ngoài sẽ hỏi về nguồn dữ liệu ("sao hệ thống biết đơn trễ mấy ngày?") | Làm sao hệ thống đánh giá được hoàn tiền hay không|
 
 **Tóm lại (điền vào chỗ trống):**
 Trợ lý dùng `__________`, `__________`, `__________` để giúp `__________` làm được `__________`.
