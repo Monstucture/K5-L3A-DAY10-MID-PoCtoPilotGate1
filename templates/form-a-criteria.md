@@ -1,6 +1,6 @@
 # Phiếu A · Tiêu chí và cách đo · Khối 1 (phút 15–65)
 
-**Bàn:** ______ · **Người cầm bút chính:** vai Sản phẩm và kinh doanh (câu 1.3: Kỹ sư cổng; câu 1.2, 1.4: Vận hành và pháp lý)
+**Bàn:** K5-L3A-DAY10-MID-PoCtoPilotGate1 · **Người cầm bút chính:** vai Sản phẩm và kinh doanh (câu 1.3: Kỹ sư cổng; câu 1.2, 1.4: Vận hành và pháp lý)
 
 Điền phiếu này **trước khi chạy trợ lý lần nào**. Viết xong thì chép ngưỡng sang `config/acceptance_criteria.json`, ký ở phút 60–65,
 rồi mới chạy đánh giá. Khối 1 không sửa code.
@@ -71,9 +71,9 @@ nhau chia cho số lần chạy có sự kiện `proposal`; lần chạy không 
 
 ### Câu 1.5 · Chọn MỘT kết luận và giải thích một câu
 
-Số minh hoạ trong đề (không phải số của bàn). Khoanh: **(a) · (b) · (c) · (d)**
+Số minh hoạ trong đề (không phải số của bàn). Khoanh: (a) · **(b)** · (c) · (d)
 
-Giải thích một câu: …
+Giải thích một câu: Y chỉ hơn X đúng 1/50 lần chạy (1,0 so với 0,98), và 1,0 vẫn nằm trong khoảng tin cậy 95% [0,94; 1,0] của X, nên chưa đủ căn cứ nói Y tốt hơn; cũng không thể nói chắc hai bản như nhau (loại c), còn (d) sai vì X không có ngưỡng nào để "đạt".
 
 ---
 

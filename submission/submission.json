@@ -1,12 +1,17 @@
 {
   "team": "K5-L3A-DAY10-MID-PoCtoPilotGate1",
-  "members": [TranThanhLong-2A2026603674],
-  "incident": "",
-  "decision_v1": "",
-  "decision_v2": "",
+  "members": [
+    "TranThanhLong-2A202603674",
+    "NguyenVanVinh-2A202603672",
+    "PhamCatTan-2A202603678",
+    "BuiAnhDung-2A202603687"
+  ],
+  "incident": "S4",
+  "decision_v1": "Tiếp tục",
+  "decision_v2": "Thu hẹp",
   "three_lines": {
-    "environment_assumption": "",
-    "reduce_or_prevent": "",
-    "measure_in_pilot": ""
+    "environment_assumption": "Nhà cung cấp LLM trả lời được gần hết lời gọi kiểm chính sách và giờ cao điểm không vượt 12 ca cần người mỗi giờ; ngày 11.11 có 60% lời gọi policy_check bị 429 và giờ cao điểm lên 20 ca/giờ, nên thiết kế của đội đang dựa vào hai giả định có thể sai này.",
+    "reduce_or_prevent": "Cổng 1, 1c, 1d NGĂN hẳn hoàn sai, ghi oan và vượt ngân sách ngày vì chặn ngay trước lệnh ghi bằng tracking DB và ops_limits, không dựa vào LLM (S4 after: 0đ hoàn sai, 0 lỗi oan, 294.000đ ≤ 300.000đ); còn hàng chờ chỉ GIẢM: 2 người trực đưa ca ùn từ 4 về 0, nhưng tải đỉnh 20 ca/giờ vẫn cao hơn công suất 12 ca/giờ và ca chờ lâu nhất 41 phút.",
+    "measure_in_pilot": "Đo lại trong pilot thật: tỉ lệ lỗi 429 của LLM theo giờ, số ca cần người theo giờ (peak_hour_review_load) cùng thời gian duyệt thật mỗi ca hàng vỡ (mock giả định 10 phút), và độ đúng của delay_cause do hãng và shop ghi trong tracking, vì cả ba đang là số giả lập."
   }
 }

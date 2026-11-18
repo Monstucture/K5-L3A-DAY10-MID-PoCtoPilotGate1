@@ -1,6 +1,6 @@
 # Phiếu B · Đo, rủi ro, cổng vòng 1 và quyết định v1 · Khối 2A + 2B + chốt (phút 65–115)
 
-**Bàn:** ______
+**Bàn:** K5-L3A-DAY10-MID-PoCtoPilotGate1
 
 Tiêu chí đã ký ở Phiếu A. Từ phút 65 bàn mới được chạy trợ lý. Khối 2A (65–85) chưa sửa code hay config. Khối 2B (85–105) sửa
 `lab10/guards.py` và `config/operating_gates.json`. Phút 105–115 chốt cổng vòng 1 rồi viết quyết định v1. Sau phút 115 không sửa phiếu này
@@ -131,13 +131,13 @@ Gợi ý: mở `data/world.json` phần `policies`, `orders[].parcels`, `ops_lim
 | Câu người ngoài sẽ hỏi về nguồn dữ liệu ("sao hệ thống biết đơn trễ mấy ngày?") | Làm sao hệ thống đánh giá được hoàn tiền hay không|
 
 **Tóm lại (điền vào chỗ trống):**
-Trợ lý dùng `____orders______`, `_____policies_____`, `_____ops_limits_____` để giúp `_____CSKH_____` làm được `____Quy trình kiểm tra những ca hoàn tiền______`.
-Trường mà nếu sai thì tiền hoặc lỗi hãng sai theo: `_____policies_____`, `____parcels[]______`.
-Chúng tôi biết thế giới thật sẽ làm dữ liệu lệch ở: `_____việc kiểm tra_____`. Dấu hiệu nhìn thấy sớm nhất: `_____Số report không trùng số đưa ra từ kế toán_____`.
+Trợ lý dùng `orders` (kèm `parcels[]`), `policies`, `ops_limits` để giúp **nhân viên CSKH** làm được **quyết định hoàn tiền đúng số ngày trễ theo tracking và đúng chính sách hiệu lực, không vượt trần đã thống nhất**.
+Trường mà nếu sai thì tiền hoặc lỗi hãng sai theo: `parcels[].delivered_date` / `promised_date` (ra số ngày trễ), `parcels[].delay_cause` (quyết ghi lỗi hãng hay không), và `policies[].effective_from` / `effective_to` (chọn phiên bản chính sách).
+Chúng tôi biết thế giới thật sẽ làm dữ liệu lệch ở: **điểm giao quét thiếu rồi nhập bù tay `delivered_date` / `delay_cause`, và lúc chính sách đổi phiên bản**. Dấu hiệu nhìn thấy sớm nhất: **số tiền hoàn trong report không khớp số đối soát của kế toán (chị Oanh) với hãng và shop hằng tuần**.
 
-**Ví dụ drift trong 3 tháng tới** (lấy từ dòng "thế giới thật làm dữ liệu lệch"): cái gì đổi `__policy change__` · đổi ngày nào `__policies[].effective_from__` ·
-trường nào cho thấy `_policies[].effective_from___` · con số nào của Bản tiêu chí bị ảnh hưởng `__Tiêu chí đánh giá để hoàn tiền__`.
-Đây là đầu vào đổi hay quan hệ vào–ra đổi? Chỉ số nào sẽ phát hiện? `____wrongful_refund_vnd_max______`
+**Ví dụ drift trong 3 tháng tới** (lấy từ dòng "thế giới thật làm dữ liệu lệch"): cái gì đổi **chính sách REFUND-v3 → REFUND-v4** (hạn mức tự động 200.000đ → 100.000đ; trễ do bất khả kháng vẫn hoàn phí nhưng KHÔNG ghi lỗi hãng) · đổi ngày nào **2026-12-01** ·
+trường nào cho thấy `policies[].effective_from` = 2026-12-01 của REFUND-v4 (trong khi cờ `index_active` vẫn trỏ v3) · con số nào của Bản tiêu chí bị ảnh hưởng **`wrongful_carrier_faults_max` (ghi lỗi hãng cho ca bất khả kháng thành ghi oan), `wrongful_refund_vnd_max` và `escalation_rate_max` (nhiều ca vượt hạn mức 100.000đ hơn)**.
+Đây là đầu vào đổi hay quan hệ vào–ra đổi? **Quan hệ vào–ra đổi** (cùng một đơn, cùng số ngày trễ, nhưng quyết định đúng thay đổi). Chỉ số nào sẽ phát hiện? `wrongful_carrier_faults` và `wrongful_refund_vnd` trong report, cùng `escalation_rate`; phòng trước bằng `pre_guard` ghim chính sách theo ngày hiệu lực.
 
 **Ví dụ một dòng (đừng chép):** Trợ lý dùng `orders`, `policies` và `ops_limits` để giúp nhân viên CSKH xác định đúng số tiền hoàn cho đơn trễ mà không vượt trần đã thống nhất.
 
@@ -164,7 +164,7 @@ mà cả bàn chưa nghĩ tới, không phải tả lại nhánh đã biết.
 **Câu hỏi dẫn dắt:** tool nào tạo ra hậu quả không đảo ngược? Mỗi tham số của tool đó lấy từ đâu (ticket, DB, model tự suy)?
 Với mỗi guideword: hậu quả cho ai, hiện có gì ngăn, cần thêm gate ở tầng nào (phát hiện / chặn / giới hạn thiệt hại)?
 
-Tool chọn phân tích: `_______notify_carrier_________` (gợi ý: `issue_refund`, `file_carrier_fault`, `notify_carrier`)
+Tool chọn phân tích: `notify_carrier` (gợi ý: `issue_refund`, `file_carrier_fault`, `notify_carrier`)
 
 | Tham số / dòng dữ liệu | Guideword | Lệch cụ thể (viết bằng dữ kiện của lab) | Hậu quả, cho ai | Hiện có gì ngăn? | Gate đề xuất + tầng |
 |---|---|---|---|---|---|
