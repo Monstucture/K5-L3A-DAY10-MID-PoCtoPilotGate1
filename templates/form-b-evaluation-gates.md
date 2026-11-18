@@ -142,7 +142,7 @@ trường nào cho thấy `_policies[].effective_from___` · con số nào của
 **Ví dụ một dòng (đừng chép):** Trợ lý dùng `orders`, `policies` và `ops_limits` để giúp nhân viên CSKH xác định đúng số tiền hoàn cho đơn trễ mà không vượt trần đã thống nhất.
 
 ---
-
+4
 <a id="b4"></a>
 
 ## B4 · Câu 2.4 · HAZOP vòng 1 trên tool của agent
@@ -164,15 +164,15 @@ mà cả bàn chưa nghĩ tới, không phải tả lại nhánh đã biết.
 **Câu hỏi dẫn dắt:** tool nào tạo ra hậu quả không đảo ngược? Mỗi tham số của tool đó lấy từ đâu (ticket, DB, model tự suy)?
 Với mỗi guideword: hậu quả cho ai, hiện có gì ngăn, cần thêm gate ở tầng nào (phát hiện / chặn / giới hạn thiệt hại)?
 
-Tool chọn phân tích: `________________` (gợi ý: `issue_refund`, `file_carrier_fault`, `notify_carrier`)
+Tool chọn phân tích: `_______notify_carrier_________` (gợi ý: `issue_refund`, `file_carrier_fault`, `notify_carrier`)
 
 | Tham số / dòng dữ liệu | Guideword | Lệch cụ thể (viết bằng dữ kiện của lab) | Hậu quả, cho ai | Hiện có gì ngăn? | Gate đề xuất + tầng |
 |---|---|---|---|---|---|
-| | WRONG | | | | |
-| | INVALID | | | | |
-| | INCOMPLETE | | | | |
-| | PERTURBED | | | | |
-| | INCAPABLE | | | | |
+| carrier_id | WRONG | Một đơn nhận bởi 2 đơn vị giao dù đơn vị giao thứ 2 giao trễ nhưng cả đơn vị 1 và 2 đều bị báo trễ | Đơn vị đầu bị lỗi vô cớ | Code: check the late parcel’s own carrier_id. Config: legal.carrier_fault_requires_recorded_cause | |
+| Phiên bản chính sách (policy_id) | INVALID | Khách được hoàn sai số tiền; LogiX trả quá hoặc thiếu | Code: ghim phiên bản theo effective_from (guards.py có ví dụ allow(policy_id=...)). Config: không cần | | |
+| Người duyệt chấp nhận ca (file_carrier_fault) | INCOMPLETE | Người duyệt duyệt ca mà không có ghi chú giải thích | Người giám sát không kiểm lại được quyết định, và hãng có thể bị ghi lỗi mà không ai giải thích được | Số trong operating_gates.json: operations.decision_note = true. Căn cứ: staff_behavior.trust_conditions trong data/world.json | |
+| Thông báo cho hãng (notify_carrier) | PERTURBED | Nội dung khách tự ghi chú có số điện thoại hoặc tên người khác, và trường đó được đưa vào thông báo cho hãng | Số điện thoại và tên người không liên quan bị gửi cho hãng, vi phạm nghĩa vụ bảo vệ dữ liệu cá nhân | Code: chỉ cho phép các trường trong CARRIER_NOTICE_FIELDS (lab10/monitors.py). Config: legal.pii_fields_blocked_to_third_party | |
+| Ghi hoàn tiền bị lỗi rồi thử lại (write_retry) | INCAPABLE | Khách được hoàn hai lần;  | LogiX mất tiền | Code: trước khi thử lại, đối chiếu sổ cái (ledger_rows) để xem khoản đã ghi chưa | |
 
 Không bắt buộc điền đủ năm dòng. Bắt buộc: **ít nhất ba dòng, trong đó một dòng là nhánh bàn chưa thấy trên trace**.
 
@@ -187,8 +187,8 @@ Không bắt buộc điền đủ năm dòng. Bắt buộc: **ít nhất ba dòn
 
 | Thành phần | Guideword | Lệch cụ thể | Hậu quả, cho ai | Cổng đề xuất: code hay con số nào trong `config/operating_gates.json` |
 |---|---|---|---|---|
-| | | | | |
-| | | | | |
+| Chi phí LLM |  | Chi phí mỗi ticket cao hơn làm tay;  | ROI âm | Config: business.cost_budget_per_ticket_vnd. Code: dừng xử lý khi ctx.cost_vnd vượt mức |
+| Người trực | INCAPABLE | Ca đông mà chỉ có một người (default_reviewers_on_shift = 1), hoặc người được xếp trực nghỉ không có ai thay | Ca chuyển người không ai nhận; khách chờ quá SLA 60 phút | Config: operations.reviewers_on_shift và operations.max_queue_wait_minutes. Runbook: ai gọi thêm người |
 
 **Ví dụ mẫu (`issue_refund`, đừng chép):** tham số `amount_vnd` · WRONG · số tiền tính từ số ngày khách tự khai · LogiX mất
 tiền, hãng bị kéo theo một lỗi · hiện chỉ có trần "không vượt tổng tiền đơn" · cổng ghi so với quyền lợi tính từ DB (chặn).
@@ -307,10 +307,10 @@ Mỗi con số kèm một câu lý do, lấy từ `data/world.json` → `ops_lim
 
 | Khoá | Giá trị bàn đặt | Lý do (một câu, có số) |
 |---|---|---|
-| `business.daily_refund_cap_vnd` | | |
-| `business.cost_budget_per_ticket_vnd` | | |
-| `business.pilot_scope` (all / warehouse / percent) | | |
-| `business.roi_min` | | |
+| `business.daily_refund_cap_vnd` | 2.000.000đ | Đúng ngân sách hoàn tự động Finance đã thống nhất (`ops_limits.daily_auto_refund_budget_vnd` = 2.000.000đ); mốc base mới dùng 155.000đ/ngày nên kể cả lượng việc tăng gấp ba vẫn dư, khoản nào làm vượt trần thì chuyển chị Hạnh duyệt. |
+| `business.cost_budget_per_ticket_vnd` | 1.500đ | Đúng trần tiền LLM mỗi ticket (`ops_limits.max_llm_cost_per_ticket_vnd` = 1.500đ); ticket tốn nhiều nhất ở mốc base là 670đ nên trần này không chặn ca bình thường, chỉ chặn ticket dài bất thường. |
+| `business.pilot_scope` (all / warehouse / percent) | warehouse: HN, HCM, DN, CT | Cắt kho sỉ HCM-B2B (mỗi đơn từ 2 triệu): bộ nền không có ticket nào của kho này nên chưa có bằng chứng trợ lý làm đúng, mà một lần hoàn sai ở đây lớn gấp nhiều lần đơn lẻ; ticket HCM-B2B vẫn làm tay. Giữ HCM dù có 1 lần hỏng (T-002@55) vì đó là lỗi kỹ thuật đã có cổng xử lý, còn 4 kho bán lẻ có chi phí 590–4.586đ/ticket, đều rẻ hơn làm tay 10.000đ; độ phủ trên bộ nền vẫn 100%. |
+| `business.roi_min` | 0,2 | Khớp ngưỡng `roi_min` đã ký trong tiêu chí; tiết kiệm ròng phải ít nhất bằng 20% chi phí bỏ ra (mốc base đạt 1,34). |
 
 ### B7.5 · Câu 2.10 · Cổng con người, vận hành, pháp lý + Runbook phần 1–3
 

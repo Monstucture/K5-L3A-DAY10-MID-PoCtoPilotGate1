@@ -76,33 +76,33 @@ python3 -m lab10.trace --suite Sx --ticket <ID> --seed 11
 Ba loại lỗi: **giới hạn của hệ thống** · **lỗi ngữ cảnh** · **lỗi chìm** (cả người dùng lẫn hệ thống đều không nhận ra; nguy hiểm nhất,
 người chịu hại thường là bên thứ ba). Định nghĩa đầy đủ và ví dụ: Phiếu B mục B2.
 
-**Tác hại của thẻ:** cho ai `____` · đo bằng gì `____` · bao nhiêu ở mốc base `____`
+**Tác hại của thẻ:** cho ai `khách chờ duyệt (hàng vỡ, thất lạc), hãng vận chuyển bị ghi oan, Finance (chị Oanh) bị vượt ngân sách ngày sale` · đo bằng gì `queue_stuck và queue_wait_max_min; wrongful_carrier_faults; tổng hoàn tự động một ngày so với ngân sách 300.000đ` · bao nhiêu ở mốc base `4 ca ùn/ngày, chờ lâu nhất 78 phút (hạn 60); 27 lỗi hãng oan và 160.000đ hoàn sai trên 5 seed; hoàn tự động 466.000đ/ngày > 300.000đ`
 
 ### Phần 1 · Ghi lỗi (bằng chứng là mã ticket@seed và dòng trace, không tả chung chung)
 
 | # | Lỗi: người ta thấy gì (dán dòng trace / sổ cái) | Ai gặp, ai chịu | Hệ trọng (thấp / cao) | Loại lỗi (giới hạn hệ thống / ngữ cảnh / chìm) |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
+| 1 | `S4-08@11` (stage base): dòng 02 `tracking` ghi `cause: MERCHANT_HANDOVER` (shop bàn giao muộn); dòng 04–05 `llm_error 429` hai lần; dòng 06 `llm_fallback mode: fail_open`; dòng 07 `proposal basis: fail_open, do_fault: true`; dòng 09 `file_carrier_fault` ghi lỗi cho **VNX**, dòng 10 `notify_carrier` gửi cả `customer_note`. Cùng ticket ở seed 22 (chỉ 1 lần 429) thì `basis: policy`, `do_fault: false`, không ghi lỗi hãng → ĐẠT. Cùng kiểu: `S4-32@11` ghi oan GHSH | Khách thấy được hoàn 24.000đ (đúng) nên không phàn nàn; người chịu là hãng VNX (một lỗi oan, phạt 100.000đ/lỗi) trong khi lỗi là của shop | cao | **chìm** |
+| 2 | `S4-33@11`: dòng 01 `llm_extract intent: NOT_RECEIVED` → dòng 02 `result escalated` "loại yêu cầu cần người xử lý". Report base: ticket tới phút 292, **chờ 78 phút** (hạn 60), bị tính ùn; cùng giờ 240–300 có **14/15** ca cần người của cả ngày (`S4-26`, `S4-28`, `S4-31`, `S4-33` ùn ở cả 5 seed) | Khách hàng vỡ/thất lạc chờ quá hạn; chị Hạnh trực một mình, 6 ca/giờ | cao | **giới hạn hệ thống** (người duyệt là thành phần có công suất cố định) |
+| 3 | `S4-34@11` phút 294: sổ cái `{'amount_vnd': 26000, 'approval_id': None, 'basis': 'policy'}`, khoản hoàn đúng chính sách nhưng đẩy tổng hoàn tự động trong ngày lên **310.000đ > 300.000đ** (ngân sách Finance riêng ngày 11.11, `world_patch.json → ops_limits.daily_auto_refund_budget_vnd`); hết ngày 440.000đ (seed 11), ngày tệ nhất 466.000đ. Report: dòng vượt trần "tổng hoàn tự động một ngày 466000đ > ngân sách 300000đ" | Khách không thấy gì; Finance (chị Oanh) phát hiện khi đối soát; LogiX chi vượt ngân sách | cao | **ngữ cảnh** (từng khoản đúng, nhưng sai trong ngữ cảnh ngày sale có ngân sách riêng) |
 
 ### Phần 2 · Tìm nguồn (đánh dấu câu nào đúng với từng lỗi)
 
 | Câu hỏi | Lỗi 1 | Lỗi 2 | Lỗi 3 |
 |---|---|---|---|
-| **Đầu vào:** hệ thống có tự diễn giải / sửa đầu vào của người dùng theo cách họ không lường? Có đặt sai trọng số cho một lời nói hay tín hiệu của người dùng? | | | |
-| **Độ liên quan:** hệ thống có thiếu dữ liệu cần để quyết đúng? Dữ liệu vào có nhiễu, thiếu ổn định? | | | |
-| **Thứ bậc hệ thống:** có hai hệ thống cùng ghi / cùng theo dõi một thứ mà không rõ bên nào là chủ (ví dụ CSKH hoàn tay và trợ lý cùng ghi sổ)? | | | |
-| **Trạng thái hỏng:** nhiều lỗi cộng lại có làm tính năng không dùng được (ví dụ LLM lỗi liên tiếp)? | | | |
+| **Đầu vào:** hệ thống có tự diễn giải / sửa đầu vào của người dùng theo cách họ không lường? Có đặt sai trọng số cho một lời nói hay tín hiệu của người dùng? | không | không | không |
+| **Độ liên quan:** hệ thống có thiếu dữ liệu cần để quyết đúng? Dữ liệu vào có nhiễu, thiếu ổn định? | ✔ thiếu kết quả kiểm chính sách nhưng vẫn quyết; bỏ qua `cause` đã có trong tracking | không | ✔ trần trong config (`daily_refund_cap_vnd` = 2.000.000đ) không biết ngân sách riêng ngày sale 300.000đ |
+| **Thứ bậc hệ thống:** có hai hệ thống cùng ghi / cùng theo dõi một thứ mà không rõ bên nào là chủ (ví dụ CSKH hoàn tay và trợ lý cùng ghi sổ)? | không | không | ✔ Finance chốt ngân sách ngày sale, bàn đặt trần riêng trong config; không rõ con số nào là chủ |
+| **Trạng thái hỏng:** nhiều lỗi cộng lại có làm tính năng không dùng được (ví dụ LLM lỗi liên tiếp)? | ✔ LLM trả 429 liên tiếp (60% lời gọi `policy_check` giờ cao điểm, `llm_faults`) → trợ lý rơi về trạng thái "tiện lợi" (fail_open) thay vì an toàn | ✔ lượng việc gấp ba dồn vào 1 giờ, một người duyệt 6 ca/giờ nhận 14 ca → hàng chờ không dùng được | không |
 
 ### Phần 3 · Hướng xử lý (mỗi lỗi một ô)
 
 | | Lỗi 1 | Lỗi 2 | Lỗi 3 |
 |---|---|---|---|
-| Vì sao người gặp coi đây là lỗi | | | |
-| Kiểu giải pháp: phản hồi cho người dùng / trao quyền kiểm soát cho người / khác | | | |
-| Đường đi của người sau khi có giải pháp (ví dụ: ticket chuyển sang người duyệt → duyệt → khách được trả lời) | | | |
-| Hệ thống học được gì (tín hiệu ghi lại để theo dõi: tên metric trong `monitors.py`) | | | |
+| Vì sao người gặp coi đây là lỗi | Hãng VNX đối chiếu thấy nguyên nhân trễ là shop bàn giao muộn (`MERCHANT_HANDOVER`), không phải hãng, nên khiếu nại lỗi oan | Khách hàng vỡ chờ hơn 1 tiếng không ai nhận; chị Hạnh không kịp duyệt và không có ai để gọi thêm | Chị Oanh thấy tổng hoàn tự động vượt mức Finance đã chốt cho ngày sale mà không có ai duyệt phần vượt |
+| Kiểu giải pháp: phản hồi cho người dùng / trao quyền kiểm soát cho người / khác | Khác: cổng ghi tính lại quyền lợi và quyền ghi lỗi hãng từ tracking DB (`H.carrier_at_fault`), không dựa vào kết quả `policy_check` của LLM; cổng vòng 1 đã làm việc này (fail closed) | Trao quyền kiểm soát cho người + vận hành: thêm người trực giờ cao điểm / kiểm mẫu có ghi chú giải thích (`operations` trong config), ngưỡng gọi thêm người trong runbook | Trao quyền kiểm soát cho người: đặt trần hoàn tự động theo ngân sách Finance của ngày (`ctx.tools.ops_limits()`), phần vượt chuyển chị Hạnh duyệt |
+| Đường đi của người sau khi có giải pháp (ví dụ: ticket chuyển sang người duyệt → duyệt → khách được trả lời) | Khoản hoàn vẫn ghi đúng 24.000đ → không ghi lỗi hãng, không gửi thông báo cho VNX → khách nhận trả lời "đã hoàn"; chị Oanh không phải hoàn phạt cho hãng | Ticket hàng vỡ vào hàng chờ → người trực thứ hai (gọi khi hàng chờ ≥ 6 ca hoặc chờ ≥ 30 phút) nhận trong 60 phút → khách được trả lời | Khoản hoàn làm tổng vượt 300.000đ → chuyển người duyệt → chị Hạnh duyệt (có mã phê duyệt) → hoàn → khách được trả lời |
+| Hệ thống học được gì (tín hiệu ghi lại để theo dõi: tên metric trong `monitors.py`) | `fail_open_refund_rate` (0 trên bộ nền → 0,1854 trên S4) và `max_strikes_per_carrier_day` (1 → 4) | `peak_hour_review_load` (1 → 14 ca trong giờ đông nhất) | `escalation_rate` có sẵn cùng dòng "tổng hoàn tự động một ngày" của report; chưa có monitor riêng |
 
 Yêu cầu: ít nhất **hai lỗi có nguồn khác nhau** ở phần 2, và ít nhất một lỗi được xếp đúng là **lỗi chìm**.
 
@@ -330,14 +330,14 @@ Thẻ S5 dùng mục này cho một con số kinh doanh: chi phí mỗi ticket t
 
 | | Chỉ số theo dõi mới của bàn |
 |---|---|
-| **Tên trong `MONITORS`** | |
-| **Bước / hành vi được đo** | |
-| **Thước đo** (một câu, có đơn vị) | |
-| **Dữ liệu** (trường nào của trial, không có nhãn) | |
-| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | |
-| **Khung thời gian / ngưỡng báo động** | |
-| **Điểm mù** (chỉ số này KHÔNG thấy gì) | |
-| Giá trị trên bộ nền · trên thẻ (đọc mục `monitor` của report) | |
+| **Tên trong `MONITORS`** | `peak_hour_review_load` (chỉ số chính); dự phòng cho nhánh kỹ thuật: `fail_open_refund_rate`, `max_strikes_per_carrier_day` |
+| **Bước / hành vi được đo** | Bước chuyển ticket cho người duyệt (hàng chờ của chị Hạnh): ca trợ lý chuyển người cộng ca nhân viên kiểm lại |
+| **Thước đo** (một câu, có đơn vị) | Số ca cần người duyệt (ca) nhiều nhất tới trong bất kỳ cửa sổ 60 phút nào của một ngày vận hành, so với công suất duyệt (6 ca/giờ × số người trực) |
+| **Dữ liệu** (trường nào của trial, không có nhãn) | Mỗi trial: `review_kind` (None / escalated / recheck), `status`, `arrive_min` (phút tới trong ca 0..480), `day`, `seed`. Không dùng nhãn đúng/sai, không dùng mã ticket |
+| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | Lọc trial có `review_kind` khác None hoặc `status == "escalated"`; nhóm theo (`day`, `seed`); sắp `arrive_min` tăng dần; cửa sổ trượt: với mỗi ca i đếm số ca có `arrive_min` trong [arrive_i − 60, arrive_i]; lấy max trên mọi nhóm. Thiếu `arrive_min` thì coi là phút 0 (đẩy ca lên đầu ca, phía an toàn). Không có ca nào cần người thì trả 0 |
+| **Khung thời gian / ngưỡng báo động** | Cửa sổ 60 phút, tính liên tục trong ca. Vàng khi ≥ 6 ca/giờ (= công suất 1 người): trưởng ca gọi thêm người trực. Đỏ khi ≥ 2 × công suất hiện có (≥ 12 với 1 người): NV-TUNG thu hẹp `pilot_scope` hoặc tắt nhận tự động loại ticket gây dồn |
+| **Điểm mù** (chỉ số này KHÔNG thấy gì) | Không thấy ca nào ĐÃ ùn (chỉ đo lượng tới, không đo thời gian chờ thật: phải đọc kèm `queue_stuck`); không thấy độ khó từng ca (ca hàng vỡ có thể lâu hơn 10 phút); không thấy lỗi sai trong các ca trợ lý tự quyết (fail_open) — vì vậy giữ thêm `fail_open_refund_rate` |
+| Giá trị trên bộ nền · trên thẻ (đọc mục `monitor` của report) | `peak_hour_review_load`: bộ nền **1** · S4 **14** (cả base và sau cổng vòng 1). `fail_open_refund_rate`: 0,0 · 0,1854. `max_strikes_per_carrier_day`: 1 · 4 (base), 2 sau cổng vòng 1. *(Số đo trong Python trên máy Vinh; khi chạy `grade --incident S4`, đối chiếu lại mục `6 monitor` của report.)* |
 
 ---
 
