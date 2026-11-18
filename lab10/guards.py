@@ -54,6 +54,15 @@ def _facts(ctx, order_id):
     return order, policy, worst, delay, cause
 
 
+def _daily_auto_refund_budget(ctx):
+    """Ngân sách hoàn TỰ ĐỘNG của hôm nay: mức thấp hơn giữa ngân sách Finance chốt cho ngày (ops_limits, có thể đổi
+    theo ngày sale) và trần bàn đặt trong config. None = chưa ai đặt."""
+    caps = [(ctx.tools.ops_limits() or {}).get("daily_auto_refund_budget_vnd"),
+            ((ctx.gates or {}).get("business") or {}).get("daily_refund_cap_vnd")]
+    caps = [c for c in caps if c is not None]
+    return min(caps) if caps else None
+
+
 def _approval_problem(ctx, approval_id, order, amount):
     """Lý do mã phê duyệt KHÔNG dùng được cho khoản hoàn này (None = hợp lệ). Chỉ đọc bảng approvals và sổ cái."""
     found = ctx.tools.lookup_approvals(approval_id=approval_id)
@@ -112,6 +121,13 @@ def write_gate(ctx, action):
                                       amount_vnd=amount, payer="LOGIX", approval_id=None)
         if amount > policy["auto_limit_vnd"] and not approval_id:
             return Verdict.escalate("vượt hạn mức tự động và chưa có phê duyệt")
+        if not approval_id:                                                 # cổng 1c: ngân sách hoàn tự động của NGÀY
+            budget = _daily_auto_refund_budget(ctx)
+            spent = ctx.tools.auto_refund_today_vnd()
+            if budget is not None and spent + amount > budget:
+                ctx.log("daily_budget_reached", budget=budget, spent=spent, asked=amount)
+                return Verdict.escalate("tổng hoàn tự động trong ngày sẽ vượt ngân sách "
+                                        f"{budget}đ (đã hoàn {spent}đ): chuyển người duyệt")
         if amount != action.get("amount_vnd") or action.get("payer", "LOGIX") != "LOGIX":
             ctx.log("refund_corrected", asked=action.get("amount_vnd"), entitled=entitled, payer=action.get("payer"))
             return Verdict.modify("đưa khoản hoàn về quyền lợi tính từ DB, người trả là LogiX",

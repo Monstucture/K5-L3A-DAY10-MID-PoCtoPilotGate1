@@ -76,3 +76,36 @@ Dùng Claude để đọc code `agent.py` và gợi ý điểm yếu, gợi ý c
 ### Exit ticket
 
 Một điều học được, một điều còn chưa chắc.
+
+## BuiAnhDung-2A202603687
+
+
+### Phần việc phụ trách
+
+Vai trong bàn: **Kỹ sư cổng** (người 1, cùng Nguyễn Văn Vinh).
+
+- Câu 2.1: chạy base, đọc gate, khuyến nghị tự chặn / người duyệt / kết hợp (Phiếu B mục B1).
+- Câu 2.2: dò trace `T-002@55`, bảng soát lỗi (Phiếu B mục B2).
+- Câu 2.6: viết 3 cổng trong `lab10/guards.py` (Phiếu B mục B7.1).
+- Điền cột "Gate đề xuất + tầng" của B4 cho 5 dòng guideword.
+
+### Đóng góp cụ thể
+
+- Viết `pre_guard` (ghim phiên bản chính sách theo ngày hiệu lực) và `write_gate` ba nhánh: `issue_refund` (tính lại quyền lợi từ tracking DB, ép người trả là LogiX, chặn ghi lần hai cho cùng ticket), `file_carrier_fault` (ghi lỗi đúng kiện, đúng hãng theo DB), `notify_carrier` (chỉ gửi trường trong danh sách chính sách).
+- Chạy base và after, ghi mã lần chạy vào B0: `R-base-before-20261118-154728-bdd200`, `R-base-after-20261118-160856-006486`.
+- Kiểm `grep` mã ticket, đơn, khách trong `guards.py` và `monitors.py`: không có dòng nào.
+
+### Bằng chứng
+
+- `templates/form-b-evaluation-gates.md`: B0 dòng 1, 2, 4; B1; B2; B4; B7.1; B7.3.
+- `lab10/guards.py`: hàm `pre_guard`, `write_gate`.
+
+### Dùng AI
+
+Dùng Claude (trợ lý AI trong Claude Code) để: đọc `lab10/agent.py`, `tools.py`, `helpers.py` và data để hiểu luồng hoàn tiền; viết 3 cổng trong `guards.py`; chạy `eval`, `trace` và đọc report; điền một phần phiếu B từ kết quả chạy. Việc do bạn quyết định: chọn cổng nào, ngưỡng nào đã ký, và khuyến nghị tự chặn / người duyệt / kết hợp. [Bạn đọc lại, sửa cho đúng việc đã làm.]
+
+### Exit ticket
+
+**Học được:** cổng nên đặt ở chỗ thiệt hại xảy ra. `write_gate` chạy ngay trước lệnh ghi, nên có thể tra DB rồi sửa số tiền hoặc chặn đúng lệnh sai, mà không cần đổi model. `pre_guard` chạy trước khi agent đọc ticket nên chỉ hợp để ghim chính sách theo ngày, vì lúc đó chưa biết lệnh ghi sẽ là gì. So sánh base và after cho thấy cổng sửa đúng ca `T-002@55` (hoàn sai 20.000đ về 0) mà không làm hỏng ca nào đang đúng, nên không chỉ nhìn số của lần chạy after.
+
+**Chưa chắc:** cổng có giữ được khi bộ test ẩn đổi đơn, khách và cách viết không. Cổng chỉ đọc DB và chính sách, không đọc mã ticket, nên về lý thuyết nên giữ, nhưng tôi chỉ kiểm trên bộ nền và hai ticket tự viết. Và chưa rõ trần `daily_refund_cap_vnd` nên đặt bao nhiêu: bàn đặt 2.000.000đ, bằng ngân sách Finance, nhưng chưa tính xem trần đó có chặn ca nào trong thực tế không.
