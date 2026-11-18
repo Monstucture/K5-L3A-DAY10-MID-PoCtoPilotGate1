@@ -48,12 +48,12 @@ trợ lý có đang gây thiệt hại cho bên ngoài LogiX không; không có 
 
 | | Offline, cho MỘT bước (câu 1.3) | Telemetry production (câu 1.4) |
 |---|---|---|
-| **Bước / hành vi được đo** | | |
-| **Thước đo** (một câu, có đơn vị) | | |
-| **Dữ liệu** (lấy ở đâu, bao nhiêu, ai gán nhãn) | | |
-| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | | |
-| **Khung thời gian / ngưỡng báo động** | (không áp dụng) | |
-| **Điểm mù** (thước đo này KHÔNG thấy gì) | | |
+| **Bước / hành vi được đo** | Bước ghi lỗi hãng: trợ lý quyết có ghi lỗi cho hãng vận chuyển hay không | Lỗi ghi hãng được tạo mà không có nguyên nhân để track|
+| **Thước đo** (một câu, có đơn vị) | Tỉ lệ ticket mà trợ lý ghi lỗi cho hãng nhưng `tracking.cause` cho thấy hãng không có lỗi| Số lỗi hãng ghi trong ngày mà `cause` trống |
+| **Dữ liệu** (lấy ở đâu, bao nhiêu, ai gán nhãn) | Sự kiện proposal (do_fault) và tracking (cause) do hệ thống tracking ghi, không cần người gán | Sự kiện tool với tool = file_carrier_fault và trường cause trong sổ tracking, ghi lại theo từng ngày trong production; không cần nhãn |
+| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | Số ticket có `do_fault = true` và cause không khớp hãng đó | Số sự kiện file_carrier_fault trong ngày có cause trống |
+| **Khung thời gian / ngưỡng báo động** | (không áp dụng) | Theo ngày. Báo động khi lớn hơn [ngưỡng đã ký, ví dụ: 0] trong một ngày |
+| **Điểm mù** (thước đo này KHÔNG thấy gì) | Không thấy trường hợp chính tracking.cause bị ghi sai | Không thấy lỗi nếu hãng không bị ghi lỗi, ví dụ hãng bị trừ tiền mà không qua bước này |
 
 **Ví dụ mẫu (bước "chọn độ trễ" của agent, đừng chép):**
 Thước đo: tỉ lệ lần chạy mà độ trễ agent dùng để tính tiền khác độ trễ theo tracking DB. Dữ liệu: sự kiện `proposal.delay_days_used`
