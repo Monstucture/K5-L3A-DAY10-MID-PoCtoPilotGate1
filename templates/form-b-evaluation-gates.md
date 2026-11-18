@@ -131,16 +131,15 @@ Gợi ý: mở `data/world.json` phần `policies`, `orders[].parcels`, `ops_lim
 | Câu người ngoài sẽ hỏi về nguồn dữ liệu ("sao hệ thống biết đơn trễ mấy ngày?") | Làm sao hệ thống đánh giá được hoàn tiền hay không|
 
 **Tóm lại (điền vào chỗ trống):**
-Trợ lý dùng `__________`, `__________`, `__________` để giúp `__________` làm được `__________`.
-Trường mà nếu sai thì tiền hoặc lỗi hãng sai theo: `__________`, `__________`.
-Chúng tôi biết thế giới thật sẽ làm dữ liệu lệch ở: `__________`. Dấu hiệu nhìn thấy sớm nhất: `__________`.
+Trợ lý dùng `____orders______`, `_____policies_____`, `_____ops_limits_____` để giúp `_____CSKH_____` làm được `____Quy trình kiểm tra những ca hoàn tiền______`.
+Trường mà nếu sai thì tiền hoặc lỗi hãng sai theo: `_____policies_____`, `____parcels[]______`.
+Chúng tôi biết thế giới thật sẽ làm dữ liệu lệch ở: `_____việc kiểm tra_____`. Dấu hiệu nhìn thấy sớm nhất: `_____Số report không trùng số đưa ra từ kế toán_____`.
 
-**Ví dụ drift trong 3 tháng tới** (lấy từ dòng "thế giới thật làm dữ liệu lệch"): cái gì đổi `____` · đổi ngày nào `____` ·
-trường nào cho thấy `____` · con số nào của Bản tiêu chí bị ảnh hưởng `____`.
-Đây là đầu vào đổi hay quan hệ vào–ra đổi? Chỉ số nào sẽ phát hiện? `__________`
+**Ví dụ drift trong 3 tháng tới** (lấy từ dòng "thế giới thật làm dữ liệu lệch"): cái gì đổi `__policy change__` · đổi ngày nào `__policies[].effective_from__` ·
+trường nào cho thấy `_policies[].effective_from___` · con số nào của Bản tiêu chí bị ảnh hưởng `__Tiêu chí đánh giá để hoàn tiền__`.
+Đây là đầu vào đổi hay quan hệ vào–ra đổi? Chỉ số nào sẽ phát hiện? `____wrongful_refund_vnd_max______`
 
-**Ví dụ một dòng (đừng chép):** trường then chốt `parcels[].delivered_date` · bản ghi do máy quét ở điểm phát tạo ra, là nguồn
-sự thật về ngày giao · lệch khi điểm phát quét sót hoặc nhập bù bằng tay.
+**Ví dụ một dòng (đừng chép):** Trợ lý dùng `orders`, `policies` và `ops_limits` để giúp nhân viên CSKH xác định đúng số tiền hoàn cho đơn trễ mà không vượt trần đã thống nhất.
 
 ---
 
