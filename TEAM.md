@@ -43,7 +43,7 @@ Mã commit, mã lần chạy (`runs/<mã>`), dòng trong phiếu.
 
 Một điều học được, một điều còn chưa chắc.
 
-## Nguyễn Văn Vinh-2A2026603672
+## Nguyễn Văn Vinh-2A202603672
 
 ### Phần việc phụ trách
 
