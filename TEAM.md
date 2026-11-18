@@ -90,6 +90,33 @@ Dùng Claude để đọc code `agent.py` và gợi ý điểm yếu, gợi ý c
 
 Một điều học được, một điều còn chưa chắc.
 
+## PhamCatTan-2A202603678
+
+### Phần việc phụ trách
+
+Vai trong bàn: **Sản phẩm và kinh doanh**.
+
+- Phiếu A: câu 1.1 (mục tiêu cấp hệ thống), câu 1.6 (Bản tiêu chí, ranh giới đầu ra, bốn câu soát, `business_ops`, ngày xem lại), mục A5 (ký và đẩy tiêu chí); điền và ký `config/acceptance_criteria.json`.
+- Phiếu B: mục B6 (pre-mortem bốn lăng kính), mục B7.4 câu 2.9 (cổng kinh doanh, `config/operating_gates.json` mục `business`).
+- Phiếu C: mục C5 câu 3.2 (specification), C6 (fault tree trước khi sửa), C7 (dòng `business`), C9 (fault tree sau khi sửa), C11 (cập nhật checklist, runbook phần 4–5), C12 (quyết định Gate 1 v2 và ba dòng bắt buộc).
+
+### Đóng góp cụ thể
+
+- Viết câu 1.1 và Bản tiêu chí ở câu 1.6: sáu câu "Nếu … thì chúng tôi sẽ …", hai câu ranh giới đầu ra, bảng bốn câu soát; chép ngưỡng sang `config/acceptance_criteria.json` (pass_rate ≥ 0,9; pass_k ≥ 0,8; ba ngưỡng an toàn = 0; escalation_rate ≤ 0,3; chi phí ≤ 8.000đ/ticket; ROI ≥ 0,2; 0 ca ùn; `stop_condition`; bốn dòng `decision_rule`). Ký tiêu chí lúc 15:37:18 trước lần đánh giá đầu tiên và điền A5.
+- Chạy mốc base của bộ nền, đọc khối "kinh doanh và vận hành" và "theo kho và hãng" để đặt cổng kinh doanh ở B7.4: `daily_refund_cap_vnd` 2.000.000đ, `cost_budget_per_ticket_vnd` 1.500đ, `pilot_scope` 4 kho lẻ HN, HCM, DN, CT (cắt kho sỉ HCM-B2B vì bộ nền chưa có bằng chứng), `roi_min` 0,2; mỗi số kèm lý do từ `data/world.json`.
+- Điền B6: hai lý do lăng kính kinh doanh (ticket không đối chiếu được đơn đắt hơn làm tay; mở pilot sang kho sỉ HCM-B2B), rồi điền nốt các lăng kính còn lại và đánh dấu ba lý do thành cổng phòng ngừa.
+- Vòng 2 (thẻ S4): viết specification câu 3.2 (tổng hoàn tự động trong ngày không vượt ngân sách của ngày); điền hai dòng `business` ở C7; vẽ fault tree C6 và C9 với ba nhánh kỹ thuật, kinh doanh, vận hành; điền C11 (sáu dòng checklist có PIC, runbook phần 4–5); chạy lại `lab10.grade --incident S4` và viết quyết định v2 ở C12 (Tiếp tục có điều kiện, cả bàn chốt) cùng ba dòng bắt buộc.
+
+### Bằng chứng
+
+- Commit: `f02c84e` (Phiếu A câu 1.6), `603f649` và `a3eb634` (tiêu chí và commit ký), `9902da0` (A5), `f4de5c1` (B7.4 cổng kinh doanh), `6362a47`, `c859fe0`, `60e87f3` (B6), `f939c9d` (C5 câu 3.2, C7 dòng `business`).
+- File: `config/acceptance_criteria.json` + `config/acceptance_criteria.lock` (hash `2eca858f`); `config/operating_gates.json` mục `business`; `templates/form-a-criteria.md` (A1 câu 1.1, A4, A5); `templates/form-b-evaluation-gates.md` (B6, B7.4); `templates/form-c-incident.md` (C5 câu 3.2, C6, C7, C9, C11, C12).
+- Mã lần chạy: `R-base-before-20261118-161323-85f22d` (mốc base bộ nền, dùng cho B7.4); `R-S4-after-20261118-180902-163b6c`, `R-S4-after-20261118-225303-dae488` (gói S4 sau khi sửa); `R-S4-grade-20261118-225709-dae488` (tự kiểm tra S4, PASS-VISIBLE, dùng cho C12).
+
+### Exit ticket
+
+Một điều học được, một điều còn chưa chắc.
+
 ## BuiAnhDung-2A202603687
 
 ### Phần việc phụ trách
