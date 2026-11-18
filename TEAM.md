@@ -28,19 +28,32 @@ Mỗi thành viên tự viết một mục bên dưới (chép mẫu, đổi ti�
 
 ### Phần việc phụ trách
 
-Vai trong bàn: Vận hành và pháp lý ; Form a: 1.2, 1.3,... 
+Vai trong bàn: **Vận hành và pháp lý** (trưởng nhóm).
+
+- Form A: 1.2, 1.3,
+- Phiếu B: mục B5 (checklist 9 nhóm việc, cột PIC); mục B7.5 (`config/operating_gates.json` mục `operations` và `legal`, runbook phần 1–3).
+- Phiếu C: mục C1 (mốc prepared, đối chiếu pre-mortem), C4 (HAZOP của thẻ S4), C5 câu 3.3 (giả định môi trường), C7 (bảng sửa), C10 (risk register). 
 
 ### Đóng góp cụ thể
 
-...
+- Điền `config/operating_gates.json` mục `operations` và `legal` từ dữ liệu có sẵn: người duyệt `NV-HANH`, công suất 6 ca/giờ, hạn chờ 60 phút, ghi chú giải thích và kiểm mẫu 10%, hai trường PII không gửi hãng, bắt buộc có nguyên nhân khi ghi lỗi hãng. Chưa điền `pic`, `alert_channel`, `stop_conditions` (chờ đội quyết).
+- Viết runbook B7.5 phần 1–3 và cột PIC ở B5 (nhóm việc chưa có tên người nên để Chưa). Các ngưỡng trong runbook là đề xuất, bạn cần xác nhận.
+- Thêm cổng 1d trong `lab10/guards.py`: chặn hoàn khi LLM trả 429 (`basis == "fail_open"`), chuyển người. Kiểm lại cổng cộng dồn ngân sách ngày (đã có sẵn).
+- Điền C1, C4, C5 câu 3.3, C7, C10 của Phiếu C cho thẻ S4 (bạn kiểm lại từng mục).
+- Tìm ra integrity và criteria hỏng là do xuống dòng CRLF, không phải sửa nội dung; khôi phục các file khoá về bản LF đã commit.
 
 ### Bằng chứng
 
-
+- `config/operating_gates.json` (mục `operations`, `legal`); `templates/form-b-evaluation-gates.md` (B5, B7.5).
+- `lab10/guards.py`: cổng 1d trong `write_gate`, nhánh `issue_refund`.
+- Mã lần chạy: `R-S4-after-20261118-200414-984599` (sau cổng 1d); `R-S4-grade-20261118-201657-984599` (integrity và criteria đạt).
+- `templates/form-c-incident.md`: C1, C4, C5 câu 3.3, C7, C10.
 
 ### Exit ticket
 
-Một điều học được, một điều còn chưa chắc.
+Cổng vận hành giúp ích khi số liệu có thể đo được và có tiêu chí đánh giá rõ ràng
+
+Việc chặn fail-open có làm tăng tỉ lệ chuyển người hay không thì không rõ
 
 ## NguyenVanVinh-2A202603672
 
