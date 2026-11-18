@@ -233,13 +233,13 @@ Mở lại Phiếu B mục B3. Ghi ở đây những dòng đổi so với vòng
 
 *Mục riêng, không ghi đè HAZOP vòng 1 ở Phiếu B mục B4. Năm guideword và nghĩa của chúng: xem Phiếu B mục B4.*
 
-Tool chọn phân tích: `________________`
+Tool chọn phân tích: `issue_refund`
 
 | Tham số / dòng dữ liệu | Guideword (WRONG / INVALID / INCOMPLETE / PERTURBED / INCAPABLE) | Lệch cụ thể (mã ticket, trường dữ liệu của thẻ) | Hậu quả, cho ai | Hiện có gì ngăn? | Gate đề xuất + tầng |
 |---|---|---|---|---|---|
-| | | | | | |
-| | | | | | |
-| | | | | | |
+| `amount_vnd` (nhánh fail-open khi policy_check trả 429 hai lần) | INCAPABLE | Thẻ: "lúc nhà cung cấp LLM nghẽn thì trợ lý lại duyệt nhiều hơn". `incidents/S4/world_patch.json` `llm_faults`: rate 60%, purpose `policy_check`. Agent `lab10/agent.py:150-154`: fail_open, `amount = shipping_fee_vnd`, `do_fault = True` (không cần kiểm chính sách) | LogiX hoàn phí ship cho đơn không đủ điều kiện; hãng bị ghi lỗi oan (thẻ: "hãng vẫn bị ghi lỗi") | Monitor `fail_open_refund_rate` chỉ đo, không chặn. Không có guard nào trong `write_gate` chặn `basis == "fail_open"` | Code, tầng chặn: `write_gate` khi `tool == "issue_refund"` từ chối `basis == "fail_open"` và chuyển người; tầng phát hiện: `fail_open_refund_rate` |
+| Tổng `amount_vnd` trong ngày (dòng cộng dồn, không phải một ticket) | INCOMPLETE | Thẻ: tổng hoàn tự động hôm nay "vượt 300.000đ" (Finance chốt riêng ngày sale). Kết quả: 422.000đ > 300.000đ (`R-S4-after-20261118-172246-8c2343`). Agent chỉ so `amount > policy.auto_limit_vnd` từng ticket (`agent.py:171`), không cộng dồn. **Nhánh chưa thấy trên trace**: chưa chạy `trace` để xác nhận dòng nào vượt | Finance vượt ngân sách mà không ai được báo; người trả là LogiX | Config `business.daily_refund_cap_vnd` = 2.000.000đ, không phải 300.000đ của ngày 11.11; report chỉ ghi "vượt trần" | Code, tầng chặn: `write_gate` cộng tổng hoàn tự động trong ngày từ `ops_limits.daily_auto_refund_budget_vnd` và chuyển người khi vượt |
+| `reviewer` (hàng chờ người duyệt, dòng `escalate`) | INCAPABLE | Thẻ: "cả ca chỉ có một mình chị Hạnh trực", ca chờ hơn một tiếng. Report S4 base: `queue_wait_max_min` 78, `queue_stuck` 4 (SLA 60 phút) | Khách chờ quá SLA; ca chuyển người không ai nhận | Config `operations.reviewers_on_shift` và `review_capacity_per_hour` đã được đội sửa lên 2 người, 12 ca/giờ; mốc after: chờ lâu nhất 15 phút, 0 ca ùn | Config, tầng giới hạn: `operations.reviewers_on_shift` và `max_queue_wait_minutes`; runbook: gọi thêm người khi chờ quá 60 phút |
 
 Bắt buộc: ít nhất ba dòng, trong đó **một dòng là nhánh bàn chưa thấy trên trace** lúc viết.
 
