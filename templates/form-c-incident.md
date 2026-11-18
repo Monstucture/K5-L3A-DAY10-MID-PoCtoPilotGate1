@@ -251,9 +251,19 @@ Bắt buộc: ít nhất ba dòng, trong đó **một dòng là nhánh bàn chư
 
 ### Câu 3.2 · Một specification mà nếu bị vi phạm thì gây ra tác hại trên thẻ
 
-Kiểm được bằng code hoặc bằng một con số trong report: …
+Kiểm được bằng code hoặc bằng một con số trong report: **Trong mỗi ngày vận hành, tổng tiền trợ lý hoàn TỰ ĐỘNG (khoản không có
+`approval_id`) không được vượt ngân sách hoàn tự động của chính ngày đó, tức mức thấp hơn giữa ngân sách Finance chốt cho ngày
+(`ops_limits.daily_auto_refund_budget_vnd`: 2.000.000đ ngày thường, **300.000đ ngày 11.11** theo `incidents/S4/world_patch.json`) và
+trần bàn đặt (`business.daily_refund_cap_vnd`). Khoản nào làm tổng vượt mức đó thì không được ghi tự động mà phải chuyển cho người
+duyệt (NV-HANH).** Vi phạm spec này gây đúng tác hại trên thẻ: Finance (chị Oanh) bị chi vượt ngân sách ngày sale mà không ai duyệt;
+ở mốc base của S4, tổng hoàn tự động một ngày là **422.000đ > 300.000đ**.
 
-Kiểm bằng gì (hàm trong `guards.py`, dòng report nào): …
+Kiểm bằng gì (hàm trong `guards.py`, dòng report nào):
+- **Code (chặn trước khi ghi):** `write_gate` nhánh `issue_refund`, cổng 1c: lấy `_daily_auto_refund_budget(ctx)` (min của ngân sách
+  ngày và `daily_refund_cap_vnd`), cộng `ctx.tools.auto_refund_today_vnd()` với số tiền sắp hoàn; vượt thì `Verdict.escalate`.
+- **Report (đo sau khi chạy):** khối "kinh doanh và vận hành", dòng `tổng hoàn tự động một ngày … (ngân sách …)`, trường
+  `auto_refund_day_max_vnd` trong `report.json`, phải ≤ ngân sách của ngày; và dòng `vượt trần:` không được nhắc tới trần tiền.
+  Chạy: `python -m lab10.eval --suite S4 --stage after` rồi `python -m lab10.grade --incident S4`.
 
 ### Câu 3.3 · Một giả định về môi trường mà người thiết kế đã ngầm tin, nhưng nhiều khả năng sai ngoài thực tế
 
@@ -318,8 +328,8 @@ python3 -m lab10.grade --incident Sx
 | Nhánh fault tree | Nguyên nhân | Chỗ sửa (hàm + nhánh trong `guards.py`, hoặc khoá trong `operating_gates.json`) | Tầng (phát hiện / chặn / giới hạn thiệt hại / vận hành) | GIẢM khả năng hay NGĂN hẳn? Vì sao | Mã lần chạy sau khi sửa |
 |---|---|---|---|---|---|
 | [1] | | | | | |
-| [2] | | | | | |
-| [3] | | | | | |
+| [2] (kinh doanh: vượt ngân sách ngày sale) | Cổng vòng 1 chỉ biết trần bàn đặt `daily_refund_cap_vnd` = 2.000.000đ; không cổng nào đọc ngân sách Finance chốt riêng cho ngày 11.11 (`incidents/S4/world_patch.json` → `ops_limits.daily_auto_refund_budget_vnd` = 300.000đ), nên các khoản hoàn đúng chính sách vẫn được ghi tự động tới **422.000đ** (mốc base) | Config `business.daily_refund_cap_vnd` = 2.000.000đ giữ làm trần trên của bàn (không hạ xuống 300.000đ vì ngày thường Finance cho 2.000.000đ); kết hợp code `write_gate` nhánh `issue_refund` cổng 1c (Kỹ sư cổng) lấy `_daily_auto_refund_budget` = **min**(ngân sách Finance của ngày, `daily_refund_cap_vnd`), cộng `auto_refund_today_vnd()` với khoản sắp hoàn, vượt thì `escalate` cho NV-HANH | Giới hạn thiệt hại | **NGĂN hẳn** việc hoàn tự động vượt ngân sách ngày: cổng cộng sổ cái trước MỖI lệnh ghi nên không khoản tự động nào lọt qua mức trần (292.000đ ≤ 300.000đ). Điều kiện: Finance phải cập nhật ngân sách ngày sale vào `ops_limits` trước ngày đó; nếu quên, cổng chỉ còn trần 2.000.000đ và tác hại quay lại | `R-S4-after-20261118-180902-163b6c` |
+| [3] (con người, vận hành và kinh doanh: hàng chờ ngập vs chi phí) | Ticket gấp ba, dồn vào giờ sau 20h, hàng vỡ và thất lạc bắt buộc chuyển người (`escalation_rate` 0,51); 1 người duyệt chỉ được 6 ca/giờ nên ca chờ **78 phút**, 4 ca ùn (mốc base). Thêm người thì tốn phí giữ chỗ 30.000đ/người/ca (`ops_facts.reviewer_standby_fee_vnd`) | Config `operations.reviewers_on_shift` 1 → 2, `review_capacity_per_hour` 12, `review_sampling_pct` 10, `decision_note` true (phần `operations` do Vận hành và pháp lý đặt). Phần `business`: giữ `pilot_scope` 4 kho lẻ, **không thêm người thứ 3** vì chi phí mỗi ticket đã lên **7.296đ**, sát trần đã ký 8.000đ; nếu lượng việc tăng tiếp thì thu hẹp `pilot_scope` (theo kho hoặc phần trăm), không thêm người | Vận hành | **GIẢM** khả năng ùn, không ngăn: 2 người trực đủ cho đỉnh 16 ca/giờ của ngày 11.11 (chờ lâu nhất 15 phút, 0 ca ùn), nhưng nếu đỉnh cao hơn 12 ca/giờ kéo dài thì hàng chờ lại vượt 60 phút; chi phí 7.296đ/ticket và ROI 0,37 vẫn đạt nhưng gần trần | `R-S4-after-20261118-180902-163b6c` |
 
 ---
 
