@@ -15,6 +15,8 @@ Họ tên đầy đủ và MSSV của **mọi** thành viên; thêm dòng nếu 
 | --: | --------- | ---- | --- | :---------: |
 |   1 |           |      |     |             |
 |   2 | Bùi Anh Dũng          |2A202603687      |     |             |
+|   1 |     Trần Thanh Long      |    2A2026603674  |   Vận hành và pháp lý  |     [x]        |
+|   2 |           |      |     |             |
 |   3 |           |      |     |             |
 |   4 |           |      |     |             |
 |   5 |           |      |     |             |
@@ -25,7 +27,7 @@ Ghi `members` trong `submission/submission.json` theo dạng `"HoVaTen-MSSV"`, k
 
 Mỗi thành viên tự viết một mục bên dưới (chép mẫu, đổi tiêu đề thành họ tên không dấu và MSSV, ví dụ `## NguyenVanAn-20241234`).
 
-## HoVaTen-MSSV
+## TranThanhLong-2A2026603674
 
 ### Phần việc phụ trách
 

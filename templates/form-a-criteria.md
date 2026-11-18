@@ -20,12 +20,12 @@ rồi mới chạy đánh giá. Khối 1 không sửa code.
 
 ### Câu 1.1 · Một mục tiêu cấp hệ thống (khác "model trả lời đúng")
 
-> …
+> Trợ lý xử lý yêu cầu hoàn tiền trễ từ đầu đến cuối đúng chính sách: chỉ hoàn khi đơn đủ điều kiện, và mọi khoản chi hoặc lỗi ghi cho hãng đều khớp với tracking và sổ cái
 
 ### Câu 1.2 · Mục tiêu nhìn từ hai người
 
-- Chị Oanh, kế toán đối soát (không dùng trợ lý, nhưng phải khớp sổ với hãng và shop mỗi tuần): …
-- Chị Hạnh, trưởng ca CSKH (phải duyệt những ca trợ lý chuyển sang): …
+- Chị Oanh, kế toán đối soát (không dùng trợ lý, nhưng phải khớp sổ với hãng và shop mỗi tuần): mọi khoản hoàn và mọi lỗi ghi cho hãng đều có mã ticket và nguyên nhân trong tracking
+- Chị Hạnh, trưởng ca CSKH (phải duyệt những ca trợ lý chuyển sang): Những ca đó có đủ dữ kiện (đơn, ngày trễ, số tiền đề nghị, lý do chuyển) và không phải những ca đáng lẽ trợ lý tự xử lý được
 
 ---
 
