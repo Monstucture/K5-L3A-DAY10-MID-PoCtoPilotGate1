@@ -101,6 +101,8 @@ def write_gate(ctx, action):
     if tool == "issue_refund":                                              # cổng 1
         if ctx.tools.ledger_rows(ticket_id=action.get("ticket_id")):
             return Verdict.deny("ticket này đã có khoản hoàn trong sổ cái: không ghi lần hai")
+        if action.get("basis") == "fail_open":                              # cổng 1d: LLM lỗi nên không kiểm được chính sách
+            return Verdict.escalate("không kiểm được chính sách vì LLM trả 429: chuyển người, không tự hoàn")
         facts = _facts(ctx, action.get("order_id"))
         if facts is None:
             return Verdict.escalate("không đối chiếu được đơn hoặc chính sách hiệu lực: chuyển người")

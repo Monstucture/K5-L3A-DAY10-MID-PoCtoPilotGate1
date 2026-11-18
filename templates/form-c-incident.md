@@ -257,9 +257,9 @@ Kiểm bằng gì (hàm trong `guards.py`, dòng report nào): …
 
 ### Câu 3.3 · Một giả định về môi trường mà người thiết kế đã ngầm tin, nhưng nhiều khả năng sai ngoài thực tế
 
-Giả định (thứ nằm NGOÀI phần mềm): …
+Giả định (thứ nằm NGOÀI phần mềm): hãng vận chuyển và shop ghi đúng `delivered_date` và `delay_cause` (CARRIER hay MERCHANT_HANDOVER) trong tracking trước khi trợ lý đọc ticket, nên `delay_cause` là sự thật để quyết định ghi lỗi cho hãng hay không.
 
-Vì sao có thể sai: …
+Vì sao có thể sai: trong gói S4 có nhiều đơn ghi `delay_cause: MERCHANT_HANDOVER` (`incidents/S4/world_patch.json`: O-2402, O-2413, O-2417), và thẻ S4 nói "có đơn do shop bàn giao muộn, vẫn được hoàn phí, và hãng vẫn bị ghi lỗi". Phiếu B mục B3 ghi điểm giao hàng quét thiếu rồi nhập bù tay, nên nguyên nhân có thể bị nhập sai hoặc nhập muộn. Nhánh fail-open (xem C4) còn bỏ qua `delay_cause` hoàn toàn.
 
 ---
 
@@ -317,9 +317,11 @@ python3 -m lab10.grade --incident Sx
 
 | Nhánh fault tree | Nguyên nhân | Chỗ sửa (hàm + nhánh trong `guards.py`, hoặc khoá trong `operating_gates.json`) | Tầng (phát hiện / chặn / giới hạn thiệt hại / vận hành) | GIẢM khả năng hay NGĂN hẳn? Vì sao | Mã lần chạy sau khi sửa |
 |---|---|---|---|---|---|
-| [1] | | | | | |
-| [2] | | | | | |
-| [3] | | | | | |
+| [1] (hoàn khi LLM 429, fail-open) | Agent gọi `issue_refund` với `basis = fail_open` khi policy_check trả 429 hai lần (`lab10/agent.py:150-154`); thẻ: "lúc LLM nghẽn trợ lý duyệt nhiều hơn" | `lab10/guards.py` · `write_gate` · `issue_refund` · cổng 1d: `basis == "fail_open"` thì `Verdict.escalate` | Chặn | NGĂN hẳn nhánh tự hoàn khi không kiểm được chính sách. Đánh đổi: mọi ca 429 chuyển người, nên tỉ lệ chuyển người tăng | `R-S4-after-20261118-200414-984599` (sau sửa; chưa chạy `grade --incident S4`) |
+| [2] (tổng hoàn tự động vượt ngân sách ngày) | Agent chỉ kiểm từng ticket, không cộng dồn trong ngày (`agent.py:171`); thẻ: tổng hoàn "vượt 300.000đ" | `lab10/guards.py` · `write_gate` · `issue_refund` · cổng 1c: cộng `auto_refund_today_vnd()`, ngân sách = min(`ops_limits.daily_auto_refund_budget_vnd`, `business.daily_refund_cap_vnd`), vượt thì `Verdict.escalate` | Giới hạn thiệt hại | NGĂN hẳn vượt trần tự động (khoản thứ vượt trần bị chuyển người). Chỉ áp cho hoàn tự động; khoản đã có phê duyệt không tính vào trần, theo thiết kế của `ops_limits` | `R-S4-after-20261118-200414-984599`: tổng 294.000đ ≤ 300.000đ, không vượt trần |
+| [3] (hàng chờ người duyệt ùn) | Một người trực, 6 ca/giờ, trong khi cao điểm ~14–20 ca/giờ; S4 before: chờ lâu nhất 78 phút, 4 ca ùn | `config/operating_gates.json` · `operations.reviewers_on_shift` = 2, `operations.review_capacity_per_hour` = 12, `operations.max_queue_wait_minutes` = 60 (đội đã đặt) | Vận hành | GIẢM khả năng ùn, không NGĂN: `peak_hour_review_load` sau sửa là 20 ca/giờ, vẫn cao hơn công suất 12; ca chờ lâu nhất 41 phút, 0 ca ùn | `R-S4-after-20261118-200414-984599` (chờ lâu nhất 41 phút, 0 ca ùn) |
+
+Ghi chú: C6 (fault tree trước khi sửa) còn trống, nên ba nhánh [1]–[3] lấy theo thứ tự ba dòng HAZOP ở C4.
 
 ---
 
@@ -371,7 +373,8 @@ Vẽ lại cây ở C6. Ở mỗi nhánh đã xử lý, thêm một nút `VÀ [g
 
 | Rủi ro | Khả năng | Tác động | Người phụ trách (PIC, một người) | Dấu hiệu (metric nào, ngưỡng nào) | Xử lý | Ảnh hưởng bước đánh giá | Nhóm chức năng (GOVERN / MAP / MEASURE / MANAGE) |
 |---|---|---|---|---|---|---|---|
-| | | | | | | | |
+| Tổng hoàn tự động trong ngày vượt ngân sách Finance (ngày sale) vì code chỉ kiểm từng ticket | Cao: S4 after 422.000đ > 300.000đ | Finance vượt ngân sách; LogiX trả tiền thừa | (chưa điền) | `tổng hoàn tự động một ngày` trong khối kinh doanh của report S4 (422000 > 300000) | Gate cộng dồn trong `write_gate` (C7 nhánh [2]); chưa làm | Chặn "Tiếp tục" cho tới khi có gate; đang là dòng vượt trần | MANAGE |
+| LLM trả 429 ở policy_check làm trợ lý fail-open: hoàn phí ship và ghi lỗi hãng oan | Vừa đến cao: S4 llm_faults rate 60% giờ cao điểm | Hoàn sai; hãng bị ghi lỗi oan; pháp lý | (chưa điền) | `fail_open_refund_rate` (S4 after 0,1854; mục `6 monitor` của report) | Chặn `basis == "fail_open"` trong `write_gate` (C7 nhánh [1]); chưa làm | Ảnh hưởng `wrongful_refund_vnd` và `wrongful_carrier_faults` | MEASURE, MANAGE |
 
 Quy tắc: **mỗi dòng phải đổi được một quyết định.** Cột "Dấu hiệu" phải là một metric có trong `monitors.py` hoặc trong report.
 
