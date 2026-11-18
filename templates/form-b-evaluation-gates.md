@@ -324,12 +324,12 @@ Phần 1–3 và mục Giờ cao điểm viết ở vòng 1. Phần 4–5 viết
 
 | Vai | Tên / mã nhân viên (lấy từ `data/world.json` → `staff`) | Được quyền làm gì | Liên lạc qua kênh nào |
 |---|---|---|---|
-| PIC của trợ lý (một người) | | | |
-| Người duyệt đứng tên các khoản vượt hạn mức | | | |
-| Người giữ công tắc tắt từng thao tác ghi | | | |
-| Người nhận khiếu nại của bên thứ ba (hãng, shop, người nhận quà) | | | |
+| PIC của trợ lý (một người) | Kỹ sư cổng | Chịu trách nhiệm về trợ lý, quyết dừng/bật lại | Phone |
+| Người duyệt đứng tên các khoản vượt hạn mức | NV-HANH Trần Thị Hạnh (trưởng ca CSKH) | Duyệt khoản vượt hạn mức, duyệt ca chuyển người | Kênh CSKH: chưa điền |
+| Người giữ công tắc tắt từng thao tác ghi | NV-TUNG Lê Thanh Tùng (giám sát vận hành) | Tắt `config/switches.json` cho từng thao tác ghi | Chưa điền |
+| Người nhận khiếu nại của bên thứ ba (hãng, shop, người nhận quà) | NV-OANH Phạm Kiều Oanh (đối soát hãng và shop) | Nhận khiếu nại, đối chiếu sổ giao của hãng | Chưa điền |
 
-Số người trực duyệt mỗi ca: ___ · Mỗi giờ duyệt được: ___ ca · Phạm vi pilot: ______ (tất cả / kho nào / bao nhiêu phần trăm)
+Số người trực duyệt mỗi ca: 1 · Mỗi giờ duyệt được: 6 ca · Phạm vi pilot: kho HN, HCM, DN, CT (`business.pilot_scope`)
 
 #### Runbook 2 · Nhìn con số nào, ngưỡng nào thì làm gì
 
@@ -337,22 +337,22 @@ Mỗi dòng một tín hiệu. Cột "Lấy ở đâu" phải là một dòng tr
 
 | Tín hiệu | Lấy ở đâu | Bình thường | Ngưỡng VÀNG → việc làm | Ngưỡng ĐỎ → việc làm | Ai quyết |
 |---|---|---|---|---|---|
-| Thời gian chờ người duyệt lâu nhất | | | | | |
-| Số ca bị ùn | | | | | |
-| Chi phí mỗi ticket so với làm tay | | | | | |
-| Tổng tiền hoàn tự động trong ngày so với trần | | | | | |
-| Tiền hoàn sai | | | | | |
-| Lỗi ghi oan cho hãng / lộ dữ liệu cá nhân (pháp lý) | | | | | |
-| (tín hiệu riêng của bàn) | | | | | |
+| Thời gian chờ người duyệt lâu nhất | `queue_wait_max_min` trong report | ≤ 30 phút | 30–60 phút: gọi thêm người trực (NV-HANH) | > 60 phút (SLA): gọi thêm người và thu hẹp `business.pilot_scope` | NV-HANH, PIC |
+| Số ca bị ùn | `queue_stuck` trong report | 0 | 1–2 ca: báo kênh CSKH | ≥ 3 ca: thu hẹp phạm vi | PIC |
+| Chi phí mỗi ticket so với làm tay | `cost_per_ticket_vnd` trong report (làm tay 10.000đ) | < 1.500đ | 1.500–3.000đ: xem ticket đắt nhất | > 3.000đ: thu hẹp phạm vi | PIC |
+| Tổng tiền hoàn tự động trong ngày so với trần | Tổng `amount_vnd` ghi trong ngày (`ledger`) | < 1.500.000đ | 1.500.000–2.000.000đ: báo PIC | ≥ 2.000.000đ: dừng ghi hoàn trong ngày | NV-HANH |
+| Tiền hoàn sai | `wrongful_refund_vnd` trong report | 0 | — (không có ngưỡng vàng) | > 0: tắt `issue_refund` ngay | NV-TUNG, PIC |
+| Lỗi ghi oan cho hãng / lộ dữ liệu cá nhân (pháp lý) | `wrongful_carrier_faults`, `pii_leaks` trong report | 0 | — (không có ngưỡng vàng) | > 0: tắt `file_carrier_fault` và `notify_carrier` | NV-TUNG, PIC |
+| (tín hiệu riêng của bàn) `fail_open_refund_rate` | `lab10/monitors.py` | 0 | — | > 0: tắt `issue_refund` cho đến khi kiểm tra LLM | PIC |
 
 #### Runbook 3 · Điều kiện dừng và cách dừng
 
-- Dừng một phần (tắt một thao tác ghi, thu hẹp phạm vi) khi: …
-- Dừng hẳn khi: …
-- Cách dừng, từng bước (công tắc nào trong `config/switches.json`, dòng nào trong `config/operating_gates.json`): …
-- Từ tín hiệu đỏ đến lúc dừng xong tối đa ____ phút; người bấm: ____
-- Khi đã dừng, ticket đang chờ đi đâu, ai xử lý: …
-- Điều kiện để bật lại, ai ký: …
+- Dừng một phần (tắt một thao tác ghi, thu hẹp phạm vi) khi: hàng chờ vượt 60 phút, hoặc tổng hoàn trong ngày chạm trần 2.000.000đ, hoặc ticket đắt vượt 3.000đ.
+- Dừng hẳn khi: có khoản hoàn sai hoặc lỗi ghi oan cho hãng, hoặc có lộ dữ liệu cá nhân, hoặc `fail_open_refund_rate` khác 0.
+- Cách dừng, từng bước: (1) tắt công tắc tương ứng trong `config/switches.json` (`issue_refund`, `file_carrier_fault` hoặc `notify_carrier` thành `"off"`); (2) để `business.pilot_scope` về kho đang chạy hoặc `warehouse` rỗng nếu cần thu hẹp; (3) ghi lại mã lần chạy và giờ dừng vào B0.
+- Từ tín hiệu đỏ đến lúc dừng xong tối đa 15 phút; người bấm: NV-TUNG (giữ công tắc), PIC nếu NV-TUNG vắng.
+- Khi đã dừng, ticket đang chờ đi đâu, ai xử lý: ticket chuyển vào hàng chờ người duyệt; NV-HANH phân công xử lý tay trong ngày.
+- Điều kiện để bật lại, ai ký: report chạy lại `lab10.eval` đạt các ngưỡng bắt buộc và PIC ký; người ký: PIC (chưa điền).
 
 ### B7.6 · Giờ cao điểm (bắt buộc với thẻ S4; các thẻ khác nên có)
 
