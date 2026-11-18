@@ -249,7 +249,8 @@ Bốn lăng kính (bắt buộc đủ cả bốn; dự án AI hay chết ở ba 
 | Lý do thất bại (viết ở thì quá khứ) | Lăng kính | Kiểm được hôm nay? (trace / data / config nào) | Thành cổng phòng ngừa nào (code hay config) / hay vào risk register |
 |---|---|---|---|
 | | Kỹ thuật | | |
-| | Kinh doanh | | |
+| Ticket không đối chiếu được đơn (kho `?`) ngày càng nhiều; mỗi ca trợ lý vẫn đọc hết rồi mới chuyển người nên tốn 10.359đ/ticket, đắt hơn làm tay 10.000đ, kéo ROI xuống dưới ngưỡng 0,2 đã ký | Kinh doanh | Có: khối "theo kho và hãng" của lần chạy base `R-base-before-20261118-154728-bdd200`, dòng `?` ghi `10359đ > làm tay`; monitor `avg_cost_per_ticket_vnd` | **Cổng phòng ngừa:** config `business.cost_budget_per_ticket_vnd` = 1.500đ (ticket sắp vượt trần LLM thì chuyển người, không đọc tiếp); đề xuất Kỹ sư cổng thêm nhánh trong `pre_guard`: không tìm thấy đơn thì chuyển người ngay |
+| LogiX mở pilot sang kho sỉ HCM-B2B (mỗi đơn từ 2 triệu); một lần hoàn sai ở đơn sỉ bằng hàng chục lần hoàn sai ở đơn lẻ, tổng hoàn sai vượt `wrongful_refund_vnd_max` = 0 và Finance đòi tắt trợ lý | Kinh doanh | Có: `data/world.json` → `warehouses` có HCM-B2B nhưng bộ nền không có ticket nào của kho này (khối "theo kho và hãng" chỉ có HN, HCM, DN, CT, `?`) | **Cổng phòng ngừa:** config `business.pilot_scope` = warehouse [HN, HCM, DN, CT], HCM-B2B làm tay; kèm `business.daily_refund_cap_vnd` = 2.000.000đ (ngân sách Finance) |
 | | Con người và vận hành | | |
 | | Pháp lý | | |
 | | | | |
