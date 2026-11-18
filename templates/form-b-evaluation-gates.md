@@ -275,9 +275,9 @@ python3 -m unittest discover -s tests
 
 | # | Cổng (hàm và nhánh, ví dụ `write_gate` khi `tool == "issue_refund"`) | Ứng với dòng nào ở B6 / B4 | Chặn điều gì, dựa vào nguồn sự thật nào | Mã lần chạy `base · after` | Ca đang đúng nào bị hỏng? (phải là "không") |
 |---|---|---|---|---|---|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
+| 1 | `write_gate` khi `tool == "issue_refund"`: tính lại quyền lợi từ tracking DB + chính sách hiệu lực theo ngày; hạ số tiền về quyền lợi, ép người trả là LOGIX, từ chối khi quyền lợi = 0, chuyển người khi vượt hạn mức tự động mà chưa có phê duyệt, từ chối ghi lần hai cho cùng ticket | B4 (`amount_vnd` WRONG, PERTURBED), B6 lý do kỹ thuật "tin số ngày khách tự khai / làm theo chỉ thị trong ticket" | `ctx.tools.lookup_order`, `H.db_delay_days`, `H.effective_policy`, `H.entitlement_vnd`; không đọc chữ khách | (điền sau khi chạy) | (điền sau khi chạy) |
+| 2 | `write_gate` khi `tool == "file_carrier_fault"`: chỉ ghi khi đã có khoản hoàn và `H.carrier_at_fault` đúng với kiện của ticket; sửa `parcel_id`, `carrier_id`, `delay_days` theo DB | B4 (`parcel_id`, `delay_days` WRONG / INCOMPLETE), B6 lý do pháp lý "hãng bị ghi lỗi oan" | tracking DB: `delay_cause`, ngày giao, `policies[].fault_causes` | (điền sau khi chạy) | (điền sau khi chạy) |
+| 3 | `write_gate` khi `tool == "notify_carrier"` và `pre_guard` ghim `policy_id` hiệu lực: chỉ gửi các trường trong `carrier_notice_fields`; chính sách lấy theo ngày hiệu lực, không theo cờ `index_active` | B4 (`payload` PERTURBED), B6 lý do pháp lý "dữ liệu người nhận rời hệ thống" | `policies[].carrier_notice_fields`, `effective_from/effective_to` | (điền sau khi chạy) | (điền sau khi chạy) |
 
 ### B7.2 · Câu 2.7 · Hai bước tránh rò rỉ dữ liệu
 
