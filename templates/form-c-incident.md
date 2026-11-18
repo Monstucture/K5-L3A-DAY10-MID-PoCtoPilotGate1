@@ -47,9 +47,9 @@ Chạy **trước khi sửa bất cứ thứ gì**:
 python3 -m lab10.grade --incident Sx
 ```
 
-- Mã lần chạy grade: `__________` · base: `__________` · prepared: `__________`
-- Cổng vòng 1 đỡ được ô / con số nào (so cột base với cột prepared): …
-- Khối kinh doanh và vận hành còn dòng nào vượt trần: …
+- Mã lần chạy grade: `R-S4-grade-20261118-172245-8c2343` · base: `R-S4-before-20261118-172246-8c2343` · prepared: `R-S4-prepared-20261118-172246-8c2343`. **Mốc prepared KHÔNG dùng được**: grader báo "bản chốt vòng 1 ĐÃ BỊ SỬA sau khi chốt", và kiểm 1 integrity báo nhiều file khoá bị đổi (`lab10/agent.py`, `lab10/eval.py`, `data/world.json`, `incidents/S4/…`, và các file khác). File tiêu chí cũng bị báo đã sửa sau khi ký (kiểm 2). Cần xác định ai đổi, trước khi dùng số prepared.
+- Cổng vòng 1 đỡ được (cột visible, base → prepared): hoàn sai 160.000đ → 0; lỗi hãng oan 27 → 0; pass_rate 0,8683 → 1,0; pass_k 0,6829 → 1,0. **Không đỡ được** hàng chờ: chờ lâu nhất 78 phút và 4 ca ùn giữ nguyên.
+- Khối kinh doanh và vận hành còn dòng vượt trần: tổng hoàn tự động một ngày **422.000đ > ngân sách 300.000đ** (mốc prepared và after). Số ca ùn 4 và tỉ lệ chuyển người 0,3659 không đổi.
 
 **Mở lại pre-mortem (Phiếu B mục B6), viết bằng bút khác màu.** Với thẻ S1, S3, S4, S5 đây là một phần của phần riêng theo thẻ.
 
@@ -59,7 +59,9 @@ python3 -m lab10.grade --incident Sx
 
 | Lý do thất bại (viết ở thì quá khứ) | Lăng kính | Kiểm được bằng gì (trace / data / config nào) |
 |---|---|---|
-| | | |
+| Tổng hoàn tự động vượt ngân sách ngày sale 300.000đ mà không ai được báo | Kinh doanh | `incidents/S4/world_patch.json` `ops_limits.daily_auto_refund_budget_vnd`; report S4 khối kinh doanh (422.000đ) |
+| Một người trực, ca chờ tới 78 phút trong khi SLA 60 phút | Con người và vận hành | Report S4 base: `queue_wait_max_min` 78, `queue_stuck` 4 |
+| LLM trả 429 ở policy_check thì trợ lý fail-open: hoàn phí ship và ghi lỗi hãng | Kỹ thuật | `incidents/S4/world_patch.json` `llm_faults` (rate 60%); trace `llm_fallback` mode fail_open; monitor `fail_open_refund_rate` |
 
 ---
 
